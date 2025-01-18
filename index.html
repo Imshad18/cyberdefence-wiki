@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> CyberDefence </title>
+	<iframe src="https://tryhackme.com/api/v2/badges/public-profile?userPublicId=2546051" style='border:none;'></iframe>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            background-image: url('post.jpg'); /* Background image */
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative; /* To position header */
+            overflow-x: hidden; /* Prevent horizontal scrolling */
+        }
+
+        .header {
+            width: 100%; /* Full width */
+            display: flex;
+            align-items: center; /* Center items vertically */
+            justify-content: space-between; /* Space between elements */
+            padding: 10px; /* Add padding */
+            background: rgba(0, 0, 0, 0.5); /* Background for header */
+            position: absolute; /* Position at the top */
+            top: 0; /* Top alignment */
+            left: 0; /* Left alignment */
+            z-index: 10; /* Above other elements */
+        }
+
+        /* Instagram Contact */
+        .instagram-contact {
+            display: flex;
+            align-items: center;
+            color: white;
+        }
+
+        .instagram-contact img {
+            width: 30px; /* Size of Instagram icon */
+            height: 30px; /* Size of Instagram icon */
+            margin-right: 8px; /* Space between icon and text */
+        }
+
+        h1 {
+            font-size: 2.5em; /* Title size */
+            margin: 70px 0 10px 0; /* Reduced margin */
+            color: white;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+        }
+
+        .posts {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center; /* Center posts */
+            width: 90%; /* Width of posts section */
+            max-width: 1200px; /* Max width for larger screens */
+            margin-top: 20px; /* Space between overlay and posts */
+            padding: 0 10px; /* Prevent overflow on small screens */
+        }
+
+        .post {
+            flex: 0 1 calc(30% - 10px); /* Allow three posts per row */
+            margin: 5px; /* Space around articles */
+            padding: 10px; /* Padding for posts */
+            background-color: rgba(0, 0, 0, 0.7); /* Darker background */
+            border-radius: 5px; /* Rounded corners */
+            text-align: center; /* Center text */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5); /* Shadow effect */
+            transition: transform 0.3s; /* Transition effect for scaling */
+            height: 350px; /* Fixed height for uniformity */
+        }
+
+        .post:hover {
+            transform: scale(1.05); /* Slightly scale up on hover */
+        }
+
+        .post img {
+            max-width: 100%; /* Responsive images */
+            height: auto; /* Maintain aspect ratio */
+            border-radius: 5px; /* Rounded corners for images */
+            max-height: 150px; /* Set max height for uniformity */
+        }
+
+        h2 {
+            margin: 5px 0; /* Reduced margin */
+            font-size: 1.2em; /* Smaller font size for post titles */
+            color: #fff; /* Title color */
+            height: 40px; /* Fixed height for title */
+            overflow: hidden; /* Hide overflow text */
+            text-overflow: ellipsis; /* Add ellipsis for overflow text */
+        }
+
+        .date {
+            font-size: 0.8em; /* Smaller font size for date */
+            color: #ddd; /* Date text color */
+            margin: 2px 0; /* Reduced margin */
+        }
+
+        .description {
+            color: #ddd; /* Description text color */
+            margin: 5px 0; /* Reduced margin */
+            font-size: 0.9em; /* Smaller font size for descriptions */
+        }
+
+        a {
+            text-decoration: none; /* Remove underline from links */
+            color: inherit; /* Inherit color from parent */
+        }
+
+        .see-all-posts {
+            margin: 20px; 
+            text-decoration: none; 
+            color: #3498db; /* Color for 'See All Posts' link */
+            font-size: 1.2em; /* Larger font for visibility */
+            display: inline-block; /* Make link block for styling */
+            padding: 10px 15px; /* Padding for button style */
+            border: 1px solid #3498db; /* Border for button */
+            border-radius: 5px; /* Rounded corners for button */
+            transition: background 0.3s, color 0.3s; /* Transition effects */
+        }
+
+        .see-all-posts:hover {
+            background: #3498db; /* Button background on hover */
+            color: white; /* Button text color on hover */
+        }
+        
+        .copyright {
+            position: fixed; /* Fixed position to stay at the bottom left */
+            left: 10px; /* Left margin */
+            bottom: 10px; /* Bottom margin */
+            font-size: 0.8em; /* Smaller font size */
+            color: rgba(255, 255, 255, 0.7); /* Light color for contrast */
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7); /* Shadow for readability */
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="instagram-contact">
+            <a href="https://www.instagram.com/netcat_listener" target="_blank">
+                <img src="insta.png" alt="Instagram">
+                <span style="font-weight: bold;">@netcat_listener</span>
+            </a>
+        </div>
+    </div>
+
+    <h1>Cyber Defence</h1>
+
+    <div class="posts" id="postContainer">
+        <a href="post1.html">
+            <div class="post">
+                <img src="1.jpg" alt="Understanding Cybersecurity">
+                <p class="date">October 5, 2024</p>
+                <h2>The Importance of Cybersecurity in Today's Digital World</h2>
+                <p class="description">The most important thing in today's digital World.</p>
+            </div>
+        </a>
+
+        <a href="Whiterose.html">
+            <div class="post">
+                <img src="white.png" alt="Whiterose tryhackme Walkthrough">
+                <p class="date">October 5, 2024</p>
+                <h2>Whiterose Tryhackme Walkthrough</h2>
+                <p class="description">A brief walkthrough to solve the Whiterose box.</p>
+            </div>
+        </a>
+
+        
+    </div>
+
+    <a href="all-posts.html" class="see-all-posts">See All Posts</a>
+
+    <script>
+        function searchPosts() {
+            const input = document.getElementById('searchInput');
+            const filter = input.value.toLowerCase();
+            const posts = document.querySelectorAll('.post');
+
+            posts.forEach(post => {
+                const title = post.querySelector('h2').textContent.toLowerCase();
+                const description = post.querySelector('.description').textContent.toLowerCase();
+                
+                if (title.includes(filter) || description.includes(filter)) {
+                    post.parentElement.style.display = ''; // Show post
+                } else {
+                    post.parentElement.style.display = 'none'; // Hide post
+                }
+            });
+        }
+    </script>
+
+    <div class="copyright">
+        Copyright © 2024 Cyber Defence - All Rights Reserved.
+    </div>
+
+</body>
+</html>

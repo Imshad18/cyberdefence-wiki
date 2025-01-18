@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" href="https://cyberdefence.wiki/favicon.ico" type="image/x-icon">
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Posts - CyberDefence</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            background-image: url('post.jpg'); /* Background image */
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: white;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin: 0; /* Reset margin */
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+        }
+
+        .return-home {
+            display: inline-block;
+            margin: 20px 0;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            text-decoration: none;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        .return-home:hover {
+            background-color: #2980b9;
+            transform: scale(1.05);
+        }
+
+        .search-container {
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            width: 90%; /* Adjust width for mobile */
+            max-width: 500px; /* Limit max width */
+        }
+
+        .search-input {
+            padding: 5px; /* Smaller padding */
+            border: none;
+            border-radius: 15px 0 0 15px; /* Smaller border radius */
+            outline: none;
+            width: 40%; /* Reduced width */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            font-size: 0.8em; /* Smaller font */
+        }
+
+        .search-button {
+            padding: 5px 10px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 0 15px 15px 0; /* Smaller border radius */
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            font-size: 0.8em; /* Smaller font */
+        }
+
+        .search-button:hover {
+            background-color: #2980b9;
+            transform: scale(1.05);
+        }
+
+        main {
+            display: flex;
+            flex-direction: column; /* Change to vertical stack */
+            justify-content: center; /* Center the posts */
+            align-items: center; /* Center align */
+            width: 90%;
+            max-width: 1200px;
+            margin-top: 20px;
+        }
+
+        .post {
+            display: flex;
+            flex-direction: row; /* Horizontal alignment */
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+            margin-bottom: 10px; /* Reduced margin */
+            padding: 0; /* Remove padding */
+            width: 70%; /* Further reduced width for posts */
+            height: 180px; /* Increased height for thickness */
+            text-decoration: none;
+            transition: transform 0.3s;
+        }
+
+        .post:hover {
+            transform: scale(1.02); /* Slight grow effect */
+        }
+
+        .post img {
+            width: 100%; /* Fill the width of the box */
+            height: 100%; /* Fill the height of the box */
+            border-radius: 5px;
+            object-fit: cover; /* Cover the box */
+        }
+
+        .post-content {
+            flex: 1;
+            text-align: left;
+            padding: 10px; /* Add padding to content */
+            height: 100%; /* Match the height of the image */
+            display: flex;
+            flex-direction: column; /* Stack content vertically */
+            justify-content: center; /* Center content */
+        }
+
+        h2 {
+            margin: 0 0 3px; /* Reduced margin */
+            font-size: 1.2em; /* Increased title font */
+            color: #fff; /* Title color */
+        }
+
+        .date {
+            font-size: 0.8em; /* Increased date font */
+            color: #ddd;
+            margin-bottom: 2px; /* Reduced margin */
+        }
+
+        .description {
+            color: #ddd;
+            font-size: 0.8em; /* Increased description font */
+        }
+
+        footer {
+            position: fixed;
+            left: 10px;
+            bottom: 10px;
+            font-size: 0.8em;
+            color: rgba(255, 255, 255, 0.7);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+        }
+
+        @media (max-width: 768px) {
+            .post {
+                flex-direction: column;
+                align-items: center;
+                height: auto; /* Let height adjust for mobile */
+            }
+
+            .post img {
+                margin-right: 0;
+                margin-bottom: 5px; /* Reduced margin */
+            }
+
+            .post-content {
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>All Posts</h1>
+        <a href="index.html" class="return-home">Return to Home</a>
+    </header>
+
+    <div class="search-container">
+        <input type="text" id="searchInput" class="search-input" placeholder="Search posts..." onkeyup="searchPosts()">
+        <button class="search-button">Search</button>
+    </div>
+
+    <main id="postsContainer">
+        <a href="post1.html" class="post">
+            <img src="1.jpg" alt="Understanding Cybersecurity">
+            <div class="post-content">
+                <h2>Understanding Cybersecurity</h2>
+                <p class="date">October 1, 2024</p>
+                <p class="description">This is a brief description of the first post.</p>
+            </div>
+        </a>
+
+        <a href="post2.html" class="post">
+            <img src="2.png" alt="Emerging Threats in Cybersecurity">
+            <div class="post-content">
+                <h2>Emerging Threats in Cybersecurity</h2>
+                <p class="date">October 2, 2024</p>
+                <p class="description">Explore the latest threats that businesses face.</p>
+            </div>
+        </a>
+
+        <a href="post3.html" class="post">
+            <img src="3.jpg" alt="Best Practices for Data Protection">
+            <div class="post-content">
+                <h2>Best Practices for Data Protection</h2>
+                <p class="date">October 3, 2024</p>
+                <p class="description">This guide covers essential practices.</p>
+            </div>
+        </a>
+
+        <a href="post4.html" class="post">
+            <img src="4.jpg" alt="Cybersecurity Frameworks">
+            <div class="post-content">
+                <h2>Cybersecurity Frameworks</h2>
+                <p class="date">October 4, 2024</p>
+                <p class="description">Understanding essential frameworks for cybersecurity.</p>
+            </div>
+        </a>
+
+        <a href="post5.html" class="post">
+            <img src="5.jpg" alt="The Future of Cybersecurity">
+            <div class="post-content">
+                <h2>The Future of Cybersecurity</h2>
+                <p class="date">October 5, 2024</p>
+                <p class="description">Insights into future trends in cybersecurity.</p>
+            </div>
+        </a>
+
+        <a href="post6.html" class="post">
+            <img src="6.jpg" alt="Incident Response Planning">
+            <div class="post-content">
+                <h2>Incident Response Planning</h2>
+                <p class="date">October 6, 2024</p>
+                <p class="description">How to prepare for and respond to incidents.</p>
+            </div>
+        </a>
+
+        <a href="post7.html" class="post">
+            <img src="7.jpg" alt="Malware Analysis Techniques">
+            <div class="post-content">
+                <h2>Malware Analysis Techniques</h2>
+                <p class="date">October 7, 2024</p>
+                <p class="description">An overview of malware analysis strategies.</p>
+            </div>
+        </a>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 CyberDefence. All rights reserved.</p>
+    </footer>
+
+    <script>
+        function searchPosts() {
+            // Implement search functionality if needed
+        }
+    </script>
+</body>
+</html>
