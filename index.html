@@ -4,7 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title> CyberDefence </title>
+</head>
+<body>
 	<iframe src="https://tryhackme.com/api/v2/badges/public-profile?userPublicId=2546051" style='border:none;'></iframe>
 <h1>Site is under construction...see you soon :)</h1>
-<img src = "cons.png" align=left style="width:400px;height:500px;">
-</head>
+<p>In the meanwhile, can you find the flag?</p>
+
+<script>
+function checkFlag(){
+	submitted_flag = document.flag.submitted_flag.value
+	flag_value = "VGhhdCB3YXMgZWFzeSB3YXNuJ3QgaXQ/IDspIA=="
+	
+	if (submitted_flag == flag_value) {
+		alert("Nice Job :D \nNow there might be another flag hidden here\nCan you find it?\nbtw, 64 is a great number don't you think ;)")
+	}
+	else
+	{
+	alert("Try again")
+	}
+}
+
+</script>
+
+<form name="flag" onsubmit="checkFlag(event)">
+<input type="text" name="submitted_flag"> 
+<input type="submit" value="Submit">
+
+</form>
+
+<img src = "cons.png" style="width:400px;height:500px; float:left;">
+</body>
+</html>
