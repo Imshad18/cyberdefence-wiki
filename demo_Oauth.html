@@ -1,8 +1,55 @@
 <!DOCTYPE html>
 <html>
-<head><title>Loading...</title></head>
+<head>
+  <title>Loading...</title>
+  
+  <!-- Facebook SDK Script -->
+  <script>
+    window.fbAsyncInit = function() {
+      FB.init({
+        appId      : '626975977169392', // Replace with your App ID
+        cookie     : true,
+        xfbml      : true,
+        version    : 'v14.0' // You can change this to the version you want to use
+      });
+
+      FB.AppEvents.logPageView(); // Log the page view for analytics
+    };
+
+    (function(d, s, id){
+       var js, fjs = d.getElementsByTagName(s)[0];
+       if (d.getElementById(id)) return;
+       js = d.createElement(s); js.id = id;
+       js.src = "https://connect.facebook.net/en_US/sdk.js";
+       fjs.parentNode.insertBefore(js, fjs);
+     }(document, 'script', 'facebook-jssdk'));
+  </script>
+  
+</head>
 <body>
   <h2>Logging you in...</h2>
+
+  <!-- Facebook Login Button -->
+  <button onclick="facebookLogin()">Login with Facebook</button>
+
+  <script>
+    function facebookLogin() {
+      FB.login(function(response) {
+        if (response.authResponse) {
+          console.log('Login successful');
+          // Get the token or code after successful login
+          const token = response.authResponse.accessToken;
+          const code = response.authResponse.code; // if applicable
+
+          // Redirect to the current page with the token or code as a URL parameter
+          window.location.href = window.location.origin + window.location.pathname + '?token=' + token + '&code=' + code;
+        } else {
+          console.log('User cancelled login or did not fully authorize.');
+        }
+      }, {scope: 'email'});
+    }
+  </script>
+
   <script>
     const params = new URLSearchParams(window.location.search);
     const token = params.get("token");
