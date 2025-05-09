@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Mohammad Shadab - Ethical Hacker</title>
+      <style>
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+          min-height: 100vh;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          background: linear-gradient(135deg, #1c2526 0%, #2e3839 100%);
+          overflow: hidden;
+        }
+        .container {
+          position: relative;
+          text-align: center;
+          padding: 40px;
+          background: rgba(255, 255, 255, 0.05);
+          border-radius: 15px;
+          backdrop-filter: blur(5px);
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          color: #e0e0e0;
+          animation: fadeIn 1s ease-in-out;
+          max-width: 600px;
+          width: 90%;
+        }
+        @keyframes fadeIn {
+          0% { opacity: 0; transform: translateY(20px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+        h1 {
+          font-size: 2.8rem;
+          margin-bottom: 10px;
+          color: #26a69a; /* Soft teal for your name */
+        }
+        h3 {
+          font-size: 1.4rem;
+          margin-bottom: 20px;
+          color: #b0bec5; /* Soft grayish-blue */
+        }
+        .social-links {
+          margin: 20px 0;
+        }
+        .social-links a {
+          color: #26a69a; /* Soft teal for links */
+          text-decoration: none;
+          font-size: 1.2rem;
+          margin: 0 15px;
+          transition: color 0.3s;
+        }
+        .social-links a:hover {
+          color: #4db6ac; /* Lighter teal on hover */
+        }
+        .ctf-button {
+          display: inline-block;
+          padding: 12px 25px;
+          background: rgba(38, 166, 154, 0.1); /* Subtle teal background */
+          border-radius: 8px;
+          border: 1px solid rgba(38, 166, 154, 0.3);
+          color: #26a69a;
+          font-size: 1.1rem;
+          text-decoration: none;
+          transition: all 0.3s;
+        }
+        .ctf-button:hover {
+          background: rgba(38, 166, 154, 0.2);
+          color: #4db6ac;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        /* Responsive design */
+        @media (max-width: 600px) {
+          h1 { font-size: 2rem; }
+          h3 { font-size: 1.2rem; }
+          .ctf-button { font-size: 1rem; padding: 10px 20px; }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <h1>Mohammad Shadab</h1>
+        <h3>Beginner Ethical Hacker</h3>
+        <div class="social-links">
+          <a href="https://twitter.com/imshaadab" target="_blank">@imshaadab</a>
+          <a href="https://linkedin.com/in/imshad18" target="_blank">imshad18</a>
+        </div>
+        <a href="https://ctf.cyberdefence.wiki/ctf1" class="ctf-button">Explore My CTFs</a>
+      </div>
+    </body>
+    </html>
+  `);
+});
