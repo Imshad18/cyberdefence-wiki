@@ -1,7 +1,7 @@
 <html>
   <body>
     <script>
-      fetch("https://www.nabtrade.com.au/search/search-results", {
+      fetch("www.nabtrade.com.au/search/search-results", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -14,8 +14,11 @@
           "pageSize": 10
         })
       })
-      .then(res => res.text())
-      .then(res => document.write(res));
+      .then(res => res.json())
+      .then(data => {
+        // Injecting reflected content into page
+        document.body.innerHTML = data.results.join("<br>");
+      });
     </script>
   </body>
 </html>
