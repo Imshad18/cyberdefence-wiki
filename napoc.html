@@ -16,8 +16,9 @@
       })
       .then(res => res.json())
       .then(data => {
-        // Injecting reflected content into page
-        document.body.innerHTML = data.results.join("<br>");
+        let div = document.createElement("div");
+        div.innerHTML = data.results.join("<br>");
+        document.body.appendChild(div);
       });
     </script>
   </body>
