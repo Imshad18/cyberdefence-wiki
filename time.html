@@ -1,11 +1,33 @@
-<script>
-setInterval(myFunction, 1000);
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>TIME</title>
+  <style>
+    body {
+      margin: auto;
+      width: 640px; 
+      padding: 50px;
+      font-family: 'Lexend Deca', sans-serif; 
+      color: #2E475D;    
+    }
+  </style>
+</head>
+<body>
 
-function myFunction() {
-  let d = new Date();
-  document.getElementById("demo").innerHTML=
-  d.getHours() + ":" +
-  d.getMinutes() + ":" +
-  d.getSeconds();
-}
+<h1 id="demo"></h1>
+
+<script>
+  setInterval(myFunction, 1000);
+
+  function myFunction() {
+    let d = new Date();
+    document.getElementById("demo").innerHTML =
+      d.getHours().toString().padStart(2, '0') + ":" +
+      d.getMinutes().toString().padStart(2, '0') + ":" +
+      d.getSeconds().toString().padStart(2, '0');
+  }
 </script>
+
+</body>
+</html>
