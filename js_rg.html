@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Racing Fast</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: black;
+    }
+    #hud {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      color: white;
+      font-family: Arial, sans-serif;
+      font-size: 20px;
+      z-index: 2;
+    }
+    #controls {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      z-index: 2;
+    }
+    .row {
+      display: flex;
+      justify-content: center;
+      margin: 5px;
+    }
+    .btn {
+      width: 60px;
+      height: 60px;
+      background: rgba(255, 255, 255, 0.3);
+      color: white;
+      font-size: 24px;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      margin: 5px;
+      user-select: none;
+      touch-action: manipulation;
+    }
+    canvas {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div id="hud">
+    <div id="lapTime">Lap Time: 0s</div>
+    <div id="lastLap">Last Lap: 0s</div>
+  </div>
+
+  <div id="controls">
+    <div class="row">
+      <button class="btn" data-key="w">↑</button>
+    </div>
+    <div class="row">
+      <button class="btn" data-key="a">←</button>
+      <button class="btn" data-key="s">↓</button>
+      <button class="btn" data-key="d">→</button>
+    </div>
+  </div>
+
+  <canvas id="gameCanvas" width="1200" height="720"></canvas>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const carImg = new Image();
+    const trackImg = new Image();
+    const flagImg = new Image();
+    carImg.src = "car.png";
+    trackImg.src = "track.png";
+    flagImg.src = "chequered.PNG";
+
+    const car = {
+      x: 100,
+      y: 100,
+      angle: 0,
+      speed: 5,
+      width: 100,
+      height: 75,
+    };
+
+    const startStopRect = { x: 600, y: 610, width: 100, height: 75 };
+    let carOnLine = false;
+    let lapStarted = false;
+    let startTime = null;
+    let lapTime = 0;
+    let lastLap = 0;
+
+    const keys = {};
+
+    // Keyboard input
+    document.addEventListener("keydown", (e) => keys[e.key.toLowerCase()] = true);
+    document.addEventListener("keyup", (e) => keys[e.key.toLowerCase()] = false);
+
+    // Touch buttons
+    document.querySelectorAll(".btn").forEach((btn) => {
+      const k = btn.dataset.key;
+      btn.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        keys[k] = true;
+      });
+      btn.addEventListener("touchend", (e) => {
+        e.preventDefault();
+        keys[k] = false;
+      });
+      btn.addEventListener("mousedown", () => (keys[k] = true));
+      btn.addEventListener("mouseup", () => (keys[k] = false));
+      btn.addEventListener("mouseleave", () => (keys[k] = false));
+    });
+
+    function isColliding(r1, r2) {
+      return (
+        r1.x < r2.x + r2.width &&
+        r1.x + car.width > r2.x &&
+        r1.y < r2.y + r2.height &&
+        r1.y + car.height > r2.y
+      );
+    }
+
+    function drawRotatedImage(img, x, y, angle) {
+      ctx.save();
+      ctx.translate(x + car.width / 2, y + car.height / 2);
+      ctx.rotate((angle * Math.PI) / 180);
+      ctx.drawImage(img, -car.width / 2, -car.height / 2, car.width, car.height);
+      ctx.restore();
+    }
+
+    function update() {
+      if (keys["w"]) {
+        if (keys["d"]) {
+          car.x += car.speed;
+          car.y -= car.speed;
+          car.angle = 45;
+        } else if (keys["a"]) {
+          car.x -= car.speed;
+          car.y -= car.speed;
+          car.angle = 135;
+        } else {
+          car.y -= car.speed;
+          car.angle = 90;
+        }
+      } else if (keys["s"]) {
+        if (keys["d"]) {
+          car.x += car.speed;
+          car.y += car.speed;
+          car.angle = 315;
+        } else if (keys["a"]) {
+          car.x -= car.speed;
+          car.y += car.speed;
+          car.angle = 225;
+        } else {
+          car.y += car.speed;
+          car.angle = 270;
+        }
+      } else if (keys["a"]) {
+        car.x -= car.speed;
+        car.angle = 180;
+      } else if (keys["d"]) {
+        car.x += car.speed;
+        car.angle = 0;
+      }
+
+      const carRect = {
+        x: car.x,
+        y: car.y,
+        width: car.width,
+        height: car.height,
+      };
+      const overlapping = isColliding(carRect, startStopRect);
+
+      if (!lapStarted) {
+        startTime = Date.now();
+        lapStarted = true;
+      }
+
+      if (overlapping && !carOnLine) {
+        carOnLine = true;
+        const now = Date.now();
+        lastLap = lapTime;
+        lapTime = ((now - startTime) / 1000).toFixed(2);
+        document.getElementById("lapTime").textContent = `Lap Time: ${lapTime}s`;
+        document.getElementById("lastLap").textContent = `Last Lap: ${lastLap}s`;
+        startTime = now;
+      } else if (!overlapping) {
+        carOnLine = false;
+      }
+
+      if (lapStarted) {
+        const now = Date.now();
+        lapTime = ((now - startTime) / 1000).toFixed(2);
+        document.getElementById("lapTime").textContent = `Lap Time: ${lapTime}s`;
+      }
+    }
+
+    function render() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(trackImg, 0, -250);
+      ctx.save();
+      ctx.translate(
+        startStopRect.x + startStopRect.width / 2,
+        startStopRect.y + startStopRect.height / 2
+      );
+      ctx.rotate((90 * Math.PI) / 180);
+      ctx.drawImage(
+        flagImg,
+        -startStopRect.width / 2,
+        -startStopRect.height / 2,
+        100,
+        75
+      );
+      ctx.restore();
+      drawRotatedImage(carImg, car.x, car.y, car.angle);
+    }
+
+    function gameLoop() {
+      update();
+      render();
+      requestAnimationFrame(gameLoop);
+    }
+
+    window.onload = () => {
+      gameLoop();
+    };
+  </script>
+</body>
+</html>
