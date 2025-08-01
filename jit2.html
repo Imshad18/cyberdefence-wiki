@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Lockdown Mode Test</title>
+</head>
+<body>
+  <h1>Lockdown Mode JIT & Eval Restrictions Test</h1>
+  <pre id="output"></pre>
+
+  <script>
+    const out = msg => document.getElementById('output').textContent += msg + '\n';
+
+    out('== Testing JIT / Lockdown Restrictions ==');
+
+    // 1. eval()
+    try {
+      eval("out('[+] eval() is allowed')");
+    } catch (e) {
+      out('[-] eval() is blocked: ' + e.message);
+    }
+
+    // 2. Function constructor
+    try {
+      let f = new Function("out('[+] Function() is allowed')");
+      f();
+    } catch (e) {
+      out('[-] Function() is blocked: ' + e.message);
+    }
+
+    // 3. WebAssembly
+    try {
+      const wasmCode = new Uint8Array([
+        0x00, 0x61, 0x73, 0x6d,
+        0x01, 0x00, 0x00, 0x00
+      ]);
+      WebAssembly.compile(wasmCode).then(() => {
+        out('[+] WebAssembly is allowed');
+      }).catch(e => {
+        out('[-] WebAssembly is blocked: ' + e.message);
+      });
+    } catch (e) {
+      out('[-] WebAssembly compile threw: ' + e.message);
+    }
+
+    // 4. SharedArrayBuffer (should be blocked too)
+    try {
+      let sab = new SharedArrayBuffer(1024);
+      out('[+] SharedArrayBuffer is allowed');
+    } catch (e) {
+      out('[-] SharedArrayBuffer is blocked: ' + e.message);
+    }
+
+    // 5. Testing import() dynamic import
+    try {
+      import('/nonexistent.js').catch(e => {
+        out('[+] Dynamic import() works (even if it fails): ' + e.message);
+      });
+    } catch (e) {
+      out('[-] import() is blocked: ' + e.message);
+    }
+  </script>
+</body>
+</html>
