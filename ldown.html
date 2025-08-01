@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Lockdown Mode Detection</title>
+</head>
+<body>
+  <h1>Lockdown Mode Detection</h1>
+  <div id="results"></div>
+
+  <script>
+    const results = [];
+
+    // JIT Speed Test
+    const t0 = performance.now();
+    let total = 0;
+    for (let i = 0; i < 1e7; i++) total += i;
+    const t1 = performance.now();
+    results.push(`JIT Benchmark Time: ${(t1 - t0).toFixed(2)}ms`);
+
+    // SharedArrayBuffer test
+    if (typeof SharedArrayBuffer === "function") {
+      results.push("✅ SharedArrayBuffer is ENABLED");
+    } else {
+      results.push("❌ SharedArrayBuffer is BLOCKED");
+    }
+
+    // WebAssembly test
+    if (typeof WebAssembly === "object") {
+      results.push("✅ WebAssembly is ENABLED");
+    } else {
+      results.push("❌ WebAssembly is BLOCKED");
+    }
+
+    // Display results
+    document.getElementById("results").innerHTML = results.map(r => `<p>${r}</p>`).join("");
+  </script>
+</body>
+</html>
