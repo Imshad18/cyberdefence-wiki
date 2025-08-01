@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head><title>JIT Abuse</title></head>
+<body>
+<script>
+function jitHammer() {
+  function mul(x, y) {
+    return x * y;
+  }
+
+  // Train JIT with stable types (numbers only)
+  for (let i = 0; i < 1e7; i++) {
+    mul(i, 2);
+  }
+
+   
+  mul({}, []);  
+
+  alert("JIT stress completed.");
+}
+
+jitHammer();
+</script>
+</body>
+</html>
