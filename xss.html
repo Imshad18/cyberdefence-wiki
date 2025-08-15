@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Page</title>
+    <style>
+        body { font-family: Arial; }
+        .box { border: 1px solid #ccc; padding: 10px; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Welcome</h1>
+    <div class="box" id="info"></div>
+    <div class="box" id="profile"></div>
+    <div class="box" id="results"></div>
+    <input type="text" id="input1" placeholder="Type something...">
+    <button onclick="showData()">Show Data</button>
+
+    <script>
+        let userAgent = navigator.userAgent;
+        let timeLoaded = new Date().toLocaleTimeString();
+        let randomNum = Math.floor(Math.random() * 1000);
+        let searchParams = new URLSearchParams(window.location.search);
+        let safeData = "Hello World";
+        let profileName = searchParams.get("name");
+        let themeColor = "#ff0000";
+        let productId = searchParams.get("id");
+        let trackingCode = "abc123";
+        let userRole = "guest";
+        let lastAction = null;
+        let queryData = searchParams.get("q");
+        let randomText = "Sample text here";
+
+        document.getElementById("info").textContent = "Loaded at: " + timeLoaded + " | Agent: " + userAgent;
+        document.getElementById("profile").textContent = "Profile Name: " + profileName;
+
+        function showData() {
+            let inputVal = document.getElementById("input1").value;
+            lastAction = "showData";
+            document.getElementById("results").innerHTML = queryData;
+        }
+
+        function doNothing() {
+            console.log("Doing nothing...");
+        }
+
+        function changeTheme(color) {
+            document.body.style.backgroundColor = color;
+        }
+
+        if(productId === "777") {
+            changeTheme(themeColor);
+        }
+
+        doNothing();
+    </script>
+</body>
+</html>
