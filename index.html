@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Mohammad Shadab - Ethical Hacker</title>
   <style>
     * {
@@ -17,7 +17,8 @@
       justify-content: center;
       align-items: center;
       background: linear-gradient(135deg, #1c2526 0%, #2e3839 100%);
-      overflow: hidden;
+      overflow-x: hidden;
+      padding: 20px;
     }
     .container {
       position: relative;
@@ -30,8 +31,8 @@
       border: 1px solid rgba(255, 255, 255, 0.1);
       color: #e0e0e0;
       animation: fadeIn 1s ease-in-out;
-      max-width: 600px;
-      width: 90%;
+      max-width: 900px;
+      width: 100%;
     }
     @keyframes fadeIn {
       0% { opacity: 0; transform: translateY(20px); }
@@ -61,12 +62,13 @@
       color: #4db6ac;
     }
     .button-group {
+      margin: 25px 0;
       display: flex;
-      gap: 15px;
       justify-content: center;
+      gap: 20px;
       flex-wrap: wrap;
     }
-    .ctf-button {
+    .btn {
       display: inline-block;
       padding: 12px 25px;
       background: rgba(38, 166, 154, 0.1);
@@ -77,16 +79,38 @@
       text-decoration: none;
       transition: all 0.3s;
     }
-    .ctf-button:hover {
+    .btn:hover {
       background: rgba(38, 166, 154, 0.2);
       color: #4db6ac;
       transform: translateY(-2px);
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     }
+    .achievements {
+      margin-top: 50px;
+    }
+    .achievements h2 {
+      color: #26a69a;
+      margin-bottom: 25px;
+      font-size: 1.8rem;
+    }
+    .logo-grid {
+      display: flex;
+      justify-content: center;
+      gap: 60px;
+      flex-wrap: wrap;
+    }
+    .logo-grid img {
+      height: 130px;
+      transition: transform 0.3s ease;
+    }
+    .logo-grid img:hover {
+      transform: scale(1.05);
+    }
     @media (max-width: 600px) {
       h1 { font-size: 2rem; }
       h3 { font-size: 1.2rem; }
-      .ctf-button { font-size: 1rem; padding: 10px 20px; }
+      .btn { font-size: 1rem; padding: 10px 20px; }
+      .logo-grid img { height: 100px; }
     }
   </style>
 </head>
@@ -94,13 +118,23 @@
   <div class="container">
     <h1>Mohammad Shadab</h1>
     <h3>Beginner Ethical Hacker</h3>
+
     <div class="social-links">
       <a href="https://twitter.com/imshaadab" target="_blank">@imshaadab</a>
       <a href="https://linkedin.com/in/imshadab18" target="_blank">LinkedIn</a>
     </div>
+
     <div class="button-group">
-      <a href="https://ctf.cyberdefence.wiki/ctf1" class="ctf-button">Play My CTFs</a>
-      <a href="https://xss.cyberdefence.wiki/" class="ctf-button">XSS Playground</a>
+      <a href="https://ctf.cyberdefence.wiki/ctf1" class="btn">Play My CTFs</a>
+      <a href="https://xss.cyberdefence.wiki/" class="btn">XSS Playground</a>
+    </div>
+
+    <div class="achievements">
+      <h2>I have secured:</h2>
+      <div class="logo-grid">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/e/e5/NASA_logo.svg" alt="NASA Logo">
+        <img src=meta.png alt="Meta Logo">
+      </div>
     </div>
   </div>
 </body>
