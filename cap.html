@@ -1,12 +1,12 @@
 <!doctype html>
 <html>
 <head>
-  <script src="https://www.google.com/recaptcha/api.js?render=6LdSi0wUAAAAAF9_ghmSb8-fUhxcijsiTC4_Gfjp"></script>
+  <script src="https://www.google.com/recaptcha/api.js?render=6LdSi0wUAAAAA"></script>
 </head>
 <body>
 <script>
 grecaptcha.ready(() => {
-  grecaptcha.execute('6LdSi0wUAAAAAF9_ghmSb8-fUhxcijsiTC4_Gfjp', {action: 'anything'})
+  grecaptcha.execute('6LdSi0wUAAAAAF9_ghmSbp', {action: 'anything'})
     .then(token => {
       console.log("TOKEN:", token);
       document.body.innerHTML = "<pre>" + token + "</pre>";
