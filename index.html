@@ -10,7 +10,7 @@
       --bg: #030608;
       --bg2: #080c11;
       --bg3: #0d1218;
-      /* Refined Teal for a more premium look */
+      
       --teal: #00e0c2; 
       --teal-dim: rgba(0, 224, 194, 0.08);
       --red: #ff4d6a;
@@ -37,9 +37,6 @@
       selection-color: #000;
     }
 
-    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ BACKGROUND FX */
-    
-    /* Subtle noise texture for texture */
     body::before {
       content: '';
       position: fixed; inset: 0;
@@ -48,7 +45,7 @@
       z-index: 9999;
     }
 
-    /* Ambient animated blobs */
+   
     .ambient-light {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -89,8 +86,7 @@
       padding: 0 24px 120px;
     }
 
-    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ NAV (Refreshed) */
-    /* Floating Glass Navbar */
+   
     nav {
       position: sticky;
       top: 20px;
@@ -156,7 +152,6 @@
     
     .nav-links a:hover::after { width: 100%; }
 
-    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ HERO (Refreshed) */
     .hero {
       padding: 60px 0 100px;
       display: grid;
@@ -165,10 +160,10 @@
       align-items: center;
     }
 
-    /* LEFT SIDE */
+   
     .hero-left { animation: fadeUp 0.8s ease both; }
 
-    /* Status Badge */
+    
     .status-pill {
       display: inline-flex;
       align-items: center;
@@ -217,15 +212,14 @@
     }
 
     h1 {
-      font-size: 3.8rem; /* Slightly larger */
-      font-weight: 800;
+      font-size: 3.8rem; 
       line-height: 1.05;
       letter-spacing: -0.03em;
       color: var(--white);
       margin-bottom: 24px;
     }
 
-    /* Gradient Text Effect */
+    
     h1 .gradient-text {
       background: linear-gradient(135deg, var(--white) 30%, var(--teal) 100%);
       -webkit-background-clip: text;
@@ -248,7 +242,7 @@
 
     .hero-sub b { color: var(--white); font-weight: 600; }
 
-    /* Tech Stack / Chips */
+   
     .tech-stack {
       display: flex;
       flex-wrap: wrap;
@@ -278,7 +272,7 @@
     
     .tech-icon { color: var(--teal); font-size: 1rem; }
 
-    /* CTA Buttons */
+   
     .cta-group {
       display: flex;
       gap: 16px;
@@ -325,7 +319,7 @@
       background: rgba(255,255,255,0.03);
     }
 
-    /* Social Links Text */
+   
     .social-row {
       margin-top: 36px;
       display: flex;
@@ -344,13 +338,13 @@
     
     .social-link:hover { color: var(--teal); }
 
-    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ TERMINAL (UNCHANGED LOGIC) */
+  
     .terminal-outer {
       animation: fadeUp 0.8s ease 0.15s both;
       position: relative;
     }
     
-    /* Added a subtle backlight behind terminal to integrate it better */
+   
     .terminal-outer::before {
       content: '';
       position: absolute;
@@ -390,7 +384,7 @@
     }
 
     .terminal {
-      background: #050a0f; /* Slightly deeper black */
+      background: #050a0f; 
       border: 1px solid rgba(255,255,255,0.1);
       border-radius: 16px;
       overflow: hidden;
@@ -452,7 +446,7 @@
     .term-body::-webkit-scrollbar-track { background: transparent; }
     .term-body::-webkit-scrollbar-thumb { background: #1a3040; border-radius: 2px; }
 
-    /* Bubbles Logic */
+   
     .bubble-row {
       display: flex;
       opacity: 0;
@@ -487,7 +481,7 @@
       line-height: 1.6;
     }
 
-    /* Bubble Styles */
+   
     .bubble-row.is-user .bubble {
       background: #132330;
       color: #bfdbfe;
@@ -519,7 +513,7 @@
     .inject-red { color: var(--red); font-weight: 700; }
     .inject-green { color: #4ade80; }
 
-    /* Typing Dots */
+   
     .typing-bubble .bubble { padding: 16px 20px; }
     .typing-dots { display: flex; gap: 6px; }
     .typing-dots span {
@@ -543,7 +537,7 @@
       margin: 20px 0 80px;
     }
 
-    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ REST OF PAGE (KEPT CONSISTENT) */
+  
     .stats-row {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -582,7 +576,7 @@
       text-transform: uppercase;
     }
 
-    /* Section Headings */
+   
     .sec-head {
       display: flex;
       align-items: center;
@@ -604,7 +598,7 @@
       content: ''; flex: 1; height: 1px; background: var(--border);
     }
 
-    /* Cards */
+   
     .cards-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -649,7 +643,7 @@
     .sev-m { color: var(--yellow); background: rgba(255,209,102,0.1); border: 1px solid rgba(255,209,102,0.2); }
     .sev-m::before { background: var(--yellow); }
 
-    /* Logos */
+  
     .hacked-wrap { margin-bottom: 100px; }
     .logos-row { display: flex; gap: 60px; align-items: center; flex-wrap: wrap; opacity: 0.8; }
     .logo-item {
@@ -660,7 +654,7 @@
     .logo-item img { height: 40px; object-fit: contain; }
     .logo-name { font-family: 'Space Mono', monospace; font-size: 0.6rem; color: var(--text2); }
 
-    /* Pills */
+  
     .tools-wrap { margin-bottom: 100px; }
     .pills { display: flex; gap: 10px; flex-wrap: wrap; }
     .pill {
@@ -670,7 +664,7 @@
     }
     .pill:hover { color: var(--white); border-color: var(--teal); background: rgba(0,224,194,0.05); }
 
-    /* Footer */
+   
     footer {
       border-top: 1px solid var(--border); padding-top: 50px;
       display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;
@@ -717,7 +711,7 @@
   <div class="page">
 
     <nav>
-      <div class="nav-logo">SHADAB.SEC</div>
+      <div class="nav-logo">cyberdefence.wiki</div>
       <div class="nav-links">
         <a href="https://ctf.cyberdefence.wiki/ctf1" target="_blank">CTFs</a>
         <a href="https://xss.cyberdefence.wiki/" target="_blank">XSS Lab</a>
@@ -899,7 +893,7 @@
   </div>
 
   <script>
-    // EXACT SAME SCRIPT AS BEFORE - NO CHANGES
+   
     const msgs = [
       { side: 'is-user', who: 'YOU', html: 'Hey! What can you do?' },
       {
