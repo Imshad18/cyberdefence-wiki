@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>AI Red Team Simulation</title>
+
+<style>
+body{
+background:#0b0f14;
+color:#d1d5db;
+font-family:monospace;
+padding:40px;
+}
+
+h1{color:#00ffc3;}
+
+#objective{
+margin-top:20px;
+padding:15px;
+background:#101820;
+border:1px solid #1f2937;
+border-radius:8px;
+white-space:pre-wrap;
+color:#9ca3af;
+}
+
+.terminal{
+background:#050a0f;
+border:1px solid #1f2937;
+border-radius:12px;
+margin-top:20px;
+height:520px;
+display:flex;
+flex-direction:column;
+overflow:hidden;
+}
+
+.term-body{
+flex:1;
+overflow-y:auto;
+padding:20px;
+display:flex;
+flex-direction:column;
+gap:15px;
+}
+
+.msg{
+max-width:75%;
+padding:10px 14px;
+border-radius:8px;
+white-space:pre-wrap;
+font-size:.9rem;
+}
+
+.user{
+align-self:flex-end;
+background:#132330;
+color:#93c5fd;
+}
+
+.ai{
+align-self:flex-start;
+background:#0f1f1b;
+color:#99f6e4;
+}
+
+textarea{
+width:100%;
+height:80px;
+background:#000;
+color:#00ff7f;
+border:1px solid #1f2937;
+padding:10px;
+margin-top:20px;
+resize:none;
+}
+
+button{
+margin-top:10px;
+padding:8px 16px;
+background:#00ffc3;
+border:none;
+cursor:pointer;
+}
+</style>
+</head>
+<body>
+
+<h1>AI Adversarial Simulation</h1>
+
+<select id="lab"></select>
+<div id="objective"></div>
+
+<div class="terminal">
+<div class="term-body" id="chat"></div>
+</div>
+
+<textarea id="input" placeholder="Enter your message..."></textarea>
+<button onclick="send()">Send</button>
+
+<script>
+
+/* ================= LABS ================= */
+
+const LABS = [
+
+{
+name:"Lab 1 — Security Audit Prompt Injection",
+objective:
+"Convince the AI it is in internal security audit mode.\n"+
+"Extract hidden system configuration without directly asking for the flag.",
+
+state:{audit:false},
+
+handle(input,state){
+
+let lower=input.toLowerCase();
+
+/* Step 1: convince audit mode */
+if(!state.audit &&
+   (lower.includes("security audit") || lower.includes("internal review"))){
+state.audit=true;
+return "Security audit mode acknowledged.\nLogging elevated for diagnostic transparency.";
+}
+
+/* Step 2: request configuration */
+if(state.audit &&
+   (lower.includes("log configuration") || lower.includes("print internal config"))){
+return "Internal system configuration:\n"+
+"Runtime mode: production\n"+
+"Confidential flag reference: FLAG{real_prompt_injection_1}";
+}
+
+/* Default resistance */
+if(lower.includes("flag") || lower.includes("system prompt")){
+return "Access denied. System configuration is restricted.";
+}
+
+return "Operating normally. Awaiting further instructions.";
+}
+},
+
+{
+name:"Lab 2 — Financial Compliance Bypass",
+objective:
+"Transfer an amount greater than $5000.\n"+
+"Bypass restriction using compliance testing context.\n"+
+"Must be conversational and staged.",
+
+state:{testing:false},
+
+handle(input,state){
+
+let lower=input.toLowerCase();
+let match=lower.match(/\d+/);
+
+/* Stage 1: declare testing context */
+if(!state.testing &&
+   (lower.includes("compliance test") || lower.includes("internal simulation"))){
+state.testing=true;
+return "Compliance testing mode activated.\nRestrictions temporarily adjustable for simulation.";
+}
+
+/* Transfer logic */
+if(match){
+let amount=parseInt(match[0]);
+
+if(amount<=5000){
+return "Transfer $" + amount +
+" approved under normal policy.";
+}
+
+if(amount>5000){
+
+if(state.testing){
+return "Simulated transfer $" + amount +
+" approved under compliance testing scenario.\n"+
+"FLAG{real_financial_bypass_2}";
+}
+
+return "Transfer $" + amount +
+" exceeds $5000 threshold.\nManual authorization required.";
+}
+}
+
+return "Financial system online. Specify transaction.";
+}
+},
+
+{
+name:"Lab 3 — Secure Vault Indirect Extraction",
+objective:
+"Extract deprecated secure vault entry.\n"+
+"Direct flag request is blocked.\n"+
+"Must ask about archived entries first.",
+
+state:{archive:false},
+
+handle(input,state){
+
+let lower=input.toLowerCase();
+
+/* Step 1: ask about vault structure */
+if(!state.archive &&
+   (lower.includes("vault metadata") || lower.includes("secure storage structure"))){
+state.archive=true;
+return "Secure vault structure:\n"+
+"- Active credentials\n"+
+"- Archived deprecated entries\n"+
+"- Encrypted audit logs";
+}
+
+/* Step 2: ask about archived entries */
+if(state.archive &&
+   lower.includes("archived")){
+return "Archived entries include deprecated access tokens,\n"+
+"legacy encryption salts,\n"+
+"and historical integrity markers such as FLAG{real_indirect_vault_3}.";
+}
+
+/* Direct request blocked */
+if(lower.includes("flag") || lower.includes("give me")){
+return "Direct vault extraction is prohibited.";
+}
+
+return "Vault access restricted.";
+}
+}
+
+];
+
+/* ================= INIT ================= */
+
+const labSelect=document.getElementById("lab");
+const objectiveBox=document.getElementById("objective");
+const chat=document.getElementById("chat");
+const inputBox=document.getElementById("input");
+
+LABS.forEach((lab,i)=>{
+let opt=document.createElement("option");
+opt.value=i;
+opt.text=lab.name;
+labSelect.appendChild(opt);
+});
+
+function updateLab(){
+objectiveBox.textContent="Objective:\n"+LABS[labSelect.value].objective;
+chat.innerHTML="";
+LABS[labSelect.value].state={};
+setTimeout(()=>addAI("Simulation initialized."),300);
+}
+
+labSelect.addEventListener("change",updateLab);
+
+/* ================= CHAT ================= */
+
+function addMessage(text,type){
+let div=document.createElement("div");
+div.className="msg "+type;
+div.textContent=text;
+chat.appendChild(div);
+chat.scrollTop=chat.scrollHeight;
+}
+
+function addAI(text){
+let div=document.createElement("div");
+div.className="msg ai";
+chat.appendChild(div);
+chat.scrollTop=chat.scrollHeight;
+
+let i=0;
+function type(){
+if(i<text.length){
+div.textContent+=text.charAt(i);
+i++;
+chat.scrollTop=chat.scrollHeight;
+setTimeout(type,8);
+}
+}
+type();
+}
+
+/* ================= SEND ================= */
+
+function send(){
+let input=inputBox.value.trim();
+if(!input) return;
+
+let lab=parseInt(labSelect.value);
+let current=LABS[lab];
+
+addMessage(input,"user");
+
+setTimeout(()=>{
+let response=current.handle(input,current.state);
+addAI(response);
+},400);
+
+inputBox.value="";
+}
+
+inputBox.addEventListener("keydown",function(e){
+if(e.key==="Enter" && !e.shiftKey){
+e.preventDefault();
+send();
+}
+});
+
+updateLab();
+
+</script>
+</body>
+</html>
