@@ -963,6 +963,17 @@
       showTyping();
       setTimeout(next, 1600);
     }, 800);
+
+      function revealEmail(e) {
+      e.preventDefault();
+      const u = 'shadab';
+      const d = 'cyberdefence';
+      const t = 'wiki';
+      const email = u + '@' + d + '.' + t;
+      window.location.href = 'mailto:' + email;
+      const link = document.getElementById('emailLink');
+      link.textContent = email + ' ↗';
+      link.style.color = 'var(--teal)';
   </script>
 </body>
 </html>
