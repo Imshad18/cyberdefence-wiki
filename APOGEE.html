@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>APOGEE — Rocket Works</title>
+<style>
+:root{
+  --bg:#0a0e16; --panel:#111726; --panel2:#0d1320; --line:#22304a;
+  --ink:#e8edf4; --dim:#8ba0bd; --amber:#ffb454; --cyan:#7dd3fc; --red:#ff6b6b; --green:#7ee2a8;
+  --mono:ui-monospace,'Cascadia Mono','JetBrains Mono',Menlo,Consolas,monospace;
+  --sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px}
+canvas#gl{position:fixed;inset:0;display:block}
+.screen{position:fixed;inset:0;pointer-events:none;display:none}
+.screen.active{display:block}
+.screen > *{pointer-events:auto}
+button{font-family:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);
+  border-radius:6px;padding:7px 12px;cursor:pointer;font-size:13px;transition:border-color .12s,background .12s}
+button:hover{border-color:var(--amber)}
+button.primary{background:var(--amber);color:#151007;border-color:var(--amber);font-weight:600}
+button.primary:hover{background:#ffc57a}
+button.danger{border-color:#5a2b2b;color:var(--red)}
+button:focus-visible{outline:2px solid var(--cyan);outline-offset:1px}
+input,select{background:var(--panel2);border:1px solid var(--line);color:var(--ink);border-radius:6px;padding:7px 9px;font-size:13px}
+input:focus,select:focus{outline:1px solid var(--amber)}
+.eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.22em;color:var(--dim);text-transform:uppercase}
+.mono{font-family:var(--mono)}
+::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}
+
+/* ---------- MENU ---------- */
+#menu{background:radial-gradient(1200px 700px at 70% 20%,#12203a 0%,#0a0e16 60%)}
+#menu .wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;text-align:center}
+#menu h1{font-family:var(--mono);font-weight:700;font-size:clamp(42px,9vw,84px);letter-spacing:.14em;color:var(--ink)}
+#menu h1 b{color:var(--amber)}
+#menu .sub{color:var(--dim);letter-spacing:.35em;font-family:var(--mono);font-size:11px;text-transform:uppercase}
+#menu .btns{display:flex;flex-direction:column;gap:10px;width:min(320px,80vw)}
+#menu .btns button{padding:13px;font-size:15px}
+#menu .ver{position:absolute;bottom:14px;font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:.15em}
+
+/* ---------- SHARED PANELS ---------- */
+.topbar{position:absolute;top:0;left:0;right:0;height:48px;display:flex;align-items:center;gap:10px;
+  padding:0 12px;background:linear-gradient(180deg,rgba(10,14,22,.94),rgba(10,14,22,.75));border-bottom:1px solid var(--line)}
+.topbar .title{font-family:var(--mono);letter-spacing:.18em;font-size:12px;color:var(--amber)}
+.spacer{flex:1}
+.panel{background:rgba(17,23,38,.92);border:1px solid var(--line);border-radius:10px;backdrop-filter:blur(6px)}
+
+/* ---------- VAB ---------- */
+#vab .catalog{position:absolute;top:56px;left:10px;bottom:10px;width:212px;display:flex;flex-direction:column;overflow:hidden}
+#vab .catalog .hd,#vab .right .hd{padding:10px 12px;border-bottom:1px solid var(--line)}
+#vab .cat-list{flex:1;overflow-y:auto;padding:8px}
+.cat-group{margin-bottom:6px}
+.cat-group>.eyebrow{padding:6px 4px}
+.part-btn{display:flex;align-items:center;gap:9px;width:100%;text-align:left;margin-bottom:5px;padding:7px 8px}
+.part-btn .sw{width:26px;height:26px;border-radius:5px;flex:none;border:1px solid rgba(255,255,255,.12)}
+.part-btn .nm{font-size:12.5px}
+.part-btn .st{font-family:var(--mono);font-size:9.5px;color:var(--dim)}
+#vab .right{position:absolute;top:56px;right:10px;bottom:10px;width:216px;display:flex;flex-direction:column;overflow:hidden}
+#vab .right .bd{flex:1;overflow-y:auto;padding:10px 12px}
+.statrow{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;padding:3px 0;color:var(--dim)}
+.statrow b{color:var(--ink);font-weight:500}
+.stage-card{border:1px solid var(--line);border-radius:8px;padding:7px 9px;margin-top:7px;background:var(--panel2)}
+.stage-card .eyebrow{color:var(--amber)}
+.stage-card div{font-size:11.5px;color:var(--dim);margin-top:3px}
+#selInfo{font-size:12px;color:var(--dim);margin-top:8px;min-height:34px}
+#vab .footer-hint{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);font-family:var(--mono);
+  font-size:10.5px;color:var(--dim);background:rgba(10,14,22,.7);padding:5px 12px;border-radius:20px;letter-spacing:.06em;white-space:nowrap}
+.symrow{display:flex;gap:6px;margin-top:8px}
+.symrow button{flex:1;padding:5px 0;font-family:var(--mono)}
+.symrow button.on{border-color:var(--amber);color:var(--amber)}
+
+/* ---------- FLIGHT ---------- */
+#flight .telem{position:absolute;top:56px;left:10px;width:212px;padding:10px 12px}
+#flight .telem .big{font-family:var(--mono);font-size:20px;color:var(--cyan);margin:1px 0 7px}
+#flight .telem .big small{font-size:11px;color:var(--dim)}
+.trow{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;padding:2.5px 0}
+.trow span{color:var(--dim)} .trow b{font-weight:500;color:var(--ink)}
+#flight .stagepanel{position:absolute;right:10px;top:56px;width:190px;padding:10px 12px}
+#flight .ctl{position:absolute;left:50%;transform:translateX(-50%);bottom:10px;display:flex;align-items:flex-end;gap:14px}
+#navball{width:132px;height:132px;border-radius:50%;border:1px solid var(--line);background:#0b101c}
+.throt{display:flex;flex-direction:column;align-items:center;gap:4px}
+.throt .bar{width:14px;height:96px;border:1px solid var(--line);border-radius:7px;background:var(--panel2);position:relative;overflow:hidden}
+.throt .fill{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(180deg,#ffd28a,var(--amber));height:0%}
+#warpRow{display:flex;gap:4px}
+#warpRow button{padding:4px 8px;font-family:var(--mono);font-size:11px}
+#warpRow button.on{color:var(--amber);border-color:var(--amber)}
+#msgFeed{position:absolute;top:56px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:5px;align-items:center}
+.msg{font-family:var(--mono);font-size:12px;padding:6px 14px;border-radius:6px;background:rgba(17,23,38,.9);
+  border:1px solid var(--line);animation:fadeout 4s forwards}
+.msg.warn{color:var(--amber);border-color:#4d3a1c} .msg.bad{color:var(--red);border-color:#5a2b2b} .msg.good{color:var(--green)}
+@keyframes fadeout{0%,75%{opacity:1}100%{opacity:0}}
+#deadPanel{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(6,8,13,.55)}
+#deadPanel .card{padding:26px 30px;text-align:center;display:flex;flex-direction:column;gap:14px}
+#deadPanel h2{font-family:var(--mono);letter-spacing:.2em;color:var(--red);font-size:18px}
+.touchpad{position:absolute;bottom:12px;display:none;gap:8px}
+.touchpad button{width:46px;height:46px;font-family:var(--mono);font-size:15px}
+#tpL{left:12px} #tpR{right:12px;flex-direction:column;align-items:flex-end}
+@media (pointer:coarse){.touchpad{display:flex}#flight .stagepanel{display:none}}
+
+/* ---------- MAP ---------- */
+#mapWrap{position:absolute;inset:0;display:none;background:rgba(7,10,16,.92)}
+#mapWrap.on{display:block}
+#mapCanvas{position:absolute;inset:0;width:100%;height:100%}
+#mapHud{position:absolute;top:56px;left:10px;padding:10px 12px}
+
+/* ---------- MODALS ---------- */
+.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(5,7,11,.6);z-index:40}
+.modal.on{display:flex}
+.modal .card{width:min(430px,92vw);max-height:80vh;display:flex;flex-direction:column;overflow:hidden}
+.modal .hd{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center}
+.modal .bd{padding:12px 16px;overflow-y:auto}
+.modal .ft{padding:12px 16px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end}
+.saveitem{display:flex;align-items:center;gap:8px;padding:8px;border:1px solid var(--line);border-radius:8px;margin-bottom:7px}
+.saveitem .nm{flex:1;font-size:13px}.saveitem .meta{font-family:var(--mono);font-size:10px;color:var(--dim)}
+.helpk{display:grid;grid-template-columns:110px 1fr;gap:4px 12px;font-size:12.5px}
+.helpk b{font-family:var(--mono);color:var(--amber);font-weight:500}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important;transition:none!important}}
+</style>
+</head>
+<body>
+<canvas id="gl"></canvas>
+
+<div id="menu" class="screen active"><div class="wrap">
+  <div><h1>APO<b>GEE</b></h1><div class="sub">Vehicle Assembly &amp; Flight Simulation</div></div>
+  <div class="btns">
+    <button class="primary" id="mNew">New Vehicle</button>
+    <button id="mLoad">Load Vehicle</button>
+    <button id="mResume">Resume Flight (quicksave)</button>
+    <button id="mData">Import / Export Data</button>
+    <button id="mHelp">Controls</button>
+  </div>
+  <div class="ver">APOGEE v1.0 · SINGLE-FILE BUILD · DATA STORED LOCALLY</div>
+</div></div>
+
+<div id="vab" class="screen">
+  <div class="topbar">
+    <span class="title">ASSEMBLY</span>
+    <input id="craftName" value="Untitled Vehicle" style="width:190px">
+    <button id="vSave">Save</button><button id="vLoad">Load</button><button id="vClear" class="danger">Clear</button>
+    <div class="spacer"></div>
+    <button id="vMenu">Menu</button>
+    <button class="primary" id="vLaunch">LAUNCH ▸</button>
+  </div>
+  <div class="catalog panel">
+    <div class="hd eyebrow">Part Catalog</div>
+    <div class="cat-list" id="catList"></div>
+  </div>
+  <div class="right panel">
+    <div class="hd eyebrow">Vehicle</div>
+    <div class="bd">
+      <div id="vStats"></div>
+      <div class="eyebrow" style="margin-top:12px">Radial symmetry</div>
+      <div class="symrow" id="symRow">
+        <button data-s="1">×1</button><button data-s="2" class="on">×2</button><button data-s="3">×3</button><button data-s="4">×4</button>
+      </div>
+      <div id="selInfo"></div>
+      <button id="delPart" class="danger" style="width:100%;margin-top:4px">Remove selected</button>
+      <div class="eyebrow" style="margin-top:14px">Staging (bottom → top)</div>
+      <div id="stageList"></div>
+    </div>
+  </div>
+  <div class="footer-hint">click catalog to attach · click vehicle part to select · drag to orbit · wheel to zoom</div>
+</div>
+
+<div id="flight" class="screen">
+  <div class="topbar">
+    <span class="title">FLIGHT</span><span class="mono" id="fCraftName" style="color:var(--dim);font-size:12px"></span>
+    <div class="spacer"></div>
+    <div id="warpRow"></div>
+    <button id="fMap">Map (M)</button><button id="fQS">Quicksave</button><button id="fQL">Load</button>
+    <button id="fRevert">Revert to VAB</button>
+  </div>
+  <div class="telem panel">
+    <div class="eyebrow">Altitude (ASL)</div><div class="big" id="tAlt">0 <small>m</small></div>
+    <div class="eyebrow">Velocity</div><div class="big" id="tVel">0 <small>m/s</small></div>
+    <div class="trow"><span>Apoapsis</span><b id="tAp">—</b></div>
+    <div class="trow"><span>Periapsis</span><b id="tPe">—</b></div>
+    <div class="trow"><span>Pitch</span><b id="tPitch">90°</b></div>
+    <div class="trow"><span>Dyn. press</span><b id="tQ">0 kPa</b></div>
+    <div class="trow"><span>G-force</span><b id="tG">1.0</b></div>
+    <div class="trow"><span>Mass</span><b id="tMass">0 t</b></div>
+    <div class="trow"><span>Fuel (stage)</span><b id="tFuel">—</b></div>
+    <div class="trow"><span>SAS</span><b id="tSAS" style="color:var(--green)">ON</b></div>
+    <div class="trow"><span>Mission time</span><b id="tMET">T+0s</b></div>
+  </div>
+  <div class="stagepanel panel">
+    <div class="eyebrow" style="margin-bottom:6px">Stages · space to fire</div>
+    <div id="fStages"></div>
+  </div>
+  <div class="ctl">
+    <div class="throt"><div class="bar"><div class="fill" id="throtFill"></div></div><div class="eyebrow" id="throtPct">0%</div></div>
+    <canvas id="navball" width="264" height="264"></canvas>
+  </div>
+  <div id="msgFeed"></div>
+  <div class="touchpad" id="tpL">
+    <button data-k="a">◀</button>
+    <div style="display:flex;flex-direction:column;gap:8px"><button data-k="w">▲</button><button data-k="s">▼</button></div>
+    <button data-k="d">▶</button>
+  </div>
+  <div class="touchpad" id="tpR">
+    <button data-k="shift">T+</button><button data-k="ctrl">T−</button><button data-k="x">T0</button><button data-k=" " style="width:auto;padding:0 14px">STAGE</button>
+  </div>
+  <div id="mapWrap"><canvas id="mapCanvas"></canvas>
+    <div id="mapHud" class="panel"><div class="eyebrow">Orbit</div><div id="mapInfo" class="mono" style="font-size:12px;margin-top:6px;color:var(--dim)"></div></div>
+  </div>
+  <div id="deadPanel"><div class="card panel">
+    <h2 id="deadTitle">VEHICLE DESTROYED</h2><div style="color:var(--dim)" id="deadSub">Structural failure on impact.</div>
+    <div style="display:flex;gap:8px;justify-content:center"><button class="primary" id="dRelaunch">Relaunch</button><button id="dVab">Revert to VAB</button></div>
+  </div></div>
+</div>
+
+<div class="modal" id="saveModal"><div class="card panel">
+  <div class="hd"><span class="eyebrow" id="saveModalTitle">Saved vehicles</span><div class="spacer"></div><button id="smClose">✕</button></div>
+  <div class="bd" id="saveModalBody"></div>
+</div></div>
+
+<div class="modal" id="helpModal"><div class="card panel">
+  <div class="hd"><span class="eyebrow">Flight controls</span><div class="spacer"></div><button id="hmClose">✕</button></div>
+  <div class="bd"><div class="helpk">
+    <b>W / S</b><span>Pitch</span><b>A / D</b><span>Yaw</span><b>Q / E</b><span>Roll</span>
+    <b>Shift / Ctrl</b><span>Throttle up / down</span><b>Z / X</b><span>Full / cut throttle</span>
+    <b>Space</b><span>Activate next stage</span><b>T</b><span>Toggle SAS</span><b>P</b><span>Deploy parachutes</span>
+    <b>M</b><span>Map view</span><b>, / .</b><span>Time warp − / +</span><b>F5 / F9</b><span>Quicksave / quickload</span>
+    <b>Mouse drag</b><span>Camera orbit · wheel zoom</span>
+  </div></div>
+  <div class="ft"><button class="primary" id="hmOk">Got it</button></div>
+</div></div>
+
+<div class="modal" id="dataModal"><div class="card panel">
+  <div class="hd"><span class="eyebrow">Import / export</span><div class="spacer"></div><button id="dmClose">✕</button></div>
+  <div class="bd" style="display:flex;flex-direction:column;gap:10px">
+    <div style="color:var(--dim);font-size:12.5px">Everything lives in this browser's local storage. Export a .json backup to move vehicles and saves between devices.</div>
+    <button id="expAll">Export all data (.json)</button>
+    <button id="impAll">Import data file</button>
+    <input type="file" id="impFile" accept=".json" style="display:none">
+  </div>
+</div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ================= APOGEE core ================= */
+const $=id=>document.getElementById(id);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const fmt=(v,d=0)=>v.toLocaleString('en-US',{maximumFractionDigits:d,minimumFractionDigits:d});
+const fmtDist=m=>Math.abs(m)>=100000?fmt(m/1000,1)+' km':fmt(m,0)+' m';
+const LS={
+  crafts:()=>JSON.parse(localStorage.getItem('apg_crafts')||'{}'),
+  setCrafts:c=>localStorage.setItem('apg_crafts',JSON.stringify(c)),
+  qs:()=>JSON.parse(localStorage.getItem('apg_qs')||'null'),
+  setQS:s=>localStorage.setItem('apg_qs',JSON.stringify(s)),
+};
+
+/* ---------- planet ---------- */
+const R_P=600000, G0=9.81, GM=G0*R_P*R_P, ATMO_H=70000, SCALE_H=5600, RHO0=1.2;
+const rhoAt=h=>(h>ATMO_H||h<-100)?0:RHO0*Math.exp(-Math.max(h,0)/SCALE_H);
+
+/* ---------- part catalog ---------- */
+/* attach: 'stack' | 'top' | 'radial'   sizes in meters, mass kg, thrust N */
+const PARTS={
+  podS:{name:'Vega Pod',cat:'Command',attach:'stack',r:.62,h:1.1,mass:840,torque:9000,cd:.32,color:0xe8e9ec,accent:0x2b3345,kind:'pod',topCap:true},
+  probe:{name:'Hex Core',cat:'Command',attach:'stack',r:.45,h:.35,mass:140,torque:3200,cd:.3,color:0xb9c2cf,accent:0xffb454,kind:'pod'},
+  tankS:{name:'FT-100 Tank',cat:'Fuel Tanks',attach:'stack',r:.62,h:1.2,mass:260,fuel:1000,cd:.25,color:0xdfe3e8,accent:0xffb454,kind:'tank'},
+  tankM:{name:'FT-200 Tank',cat:'Fuel Tanks',attach:'stack',r:.62,h:2.3,mass:500,fuel:2200,cd:.25,color:0xdfe3e8,accent:0xffb454,kind:'tank'},
+  tankL:{name:'FT-400 Tank',cat:'Fuel Tanks',attach:'stack',r:.62,h:4.4,mass:980,fuel:4400,cd:.25,color:0xdfe3e8,accent:0xffb454,kind:'tank'},
+  engSwift:{name:'K-45 "Swift"',cat:'Engines',attach:'stack',r:.55,h:.85,mass:480,thrust:190000,isp:305,gimbal:4,cd:.3,color:0x3a4252,kind:'engine'},
+  engTitan:{name:'K-90 "Titan"',cat:'Engines',attach:'stack',r:.62,h:1.15,mass:1450,thrust:640000,isp:288,gimbal:3,cd:.3,color:0x3a4252,kind:'engine'},
+  engVac:{name:'K-22 "Wisp"',cat:'Engines',attach:'stack',r:.6,h:1.0,mass:430,thrust:110000,isp:344,gimbal:4,cd:.3,color:0x4a4356,kind:'engine'},
+  srb:{name:'SB-6 Booster',cat:'Engines',attach:'radial',r:.42,h:3.4,mass:720,fuel:1500,thrust:280000,isp:222,gimbal:0,cd:.32,color:0xc9a06a,kind:'srb',own:true},
+  decoupler:{name:'D-1 Decoupler',cat:'Structure',attach:'stack',r:.62,h:.22,mass:55,cd:.25,color:0x8a5a2b,kind:'decoupler'},
+  nose:{name:'Aero Cone',cat:'Structure',attach:'top',r:.62,h:1.0,mass:80,cd:.08,color:0xdfe3e8,kind:'nose'},
+  finS:{name:'AV-T Fin',cat:'Aero',attach:'radial',span:.75,chord:.8,mass:42,liftA:.55,cd:.05,color:0xcfd6df,kind:'fin'},
+  wing:{name:'Delta Wing',cat:'Aero',attach:'radial',span:2.1,chord:1.6,mass:150,liftA:2.4,cd:.08,color:0xcfd6df,kind:'fin'},
+  chute:{name:'Mk-2 Parachute',cat:'Recovery',attach:'top',r:.4,h:.42,mass:70,cd:.25,chute:true,color:0xd8dde4,accent:0xff8a5c,kind:'chute'},
+};
+for(const k in PARTS)PARTS[k].id=k;
+
+/* ---------- three.js base ---------- */
+const renderer=new THREE.WebGLRenderer({canvas:$('gl'),antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+const camera=new THREE.PerspectiveCamera(60,1,0.05,4.5e6);
+function resize(){renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();}
+addEventListener('resize',resize);resize();
+
+function mat(c,rough=.6,metal=.15){return new THREE.MeshStandardMaterial({color:c,roughness:rough,metalness:metal});}
+
+/* part mesh builder */
+function buildPartMesh(def){
+  const g=new THREE.Group();
+  const add=(geo,m,y=0,rx=0)=>{const me=new THREE.Mesh(geo,m);me.position.y=y;me.rotation.x=rx;me.castShadow=false;g.add(me);return me;};
+  if(def.kind==='pod'){
+    if(def.id==='podS'){
+      add(new THREE.CylinderGeometry(def.r*.42,def.r,def.h,24),mat(def.color,.45));
+      add(new THREE.CylinderGeometry(def.r*.43,def.r*.43,def.h*.16,24),mat(def.accent,.4,.4),def.h*.18);
+      add(new THREE.CylinderGeometry(def.r*.42,def.r*.42,.06,24),mat(0x777f8d,.3,.6),def.h/2+.03);
+    }else{
+      add(new THREE.CylinderGeometry(def.r,def.r,def.h,6),mat(def.color,.5,.3));
+      add(new THREE.CylinderGeometry(def.r*.55,def.r*.55,def.h+.04,6),mat(def.accent,.4));
+    }
+  }else if(def.kind==='tank'){
+    add(new THREE.CylinderGeometry(def.r,def.r,def.h,24),mat(def.color,.4,.25));
+    add(new THREE.CylinderGeometry(def.r+.012,def.r+.012,.09,24),mat(def.accent,.45),def.h/2-.12);
+    add(new THREE.CylinderGeometry(def.r+.012,def.r+.012,.09,24),mat(0x39414f,.45),-def.h/2+.12);
+  }else if(def.kind==='engine'){
+    add(new THREE.CylinderGeometry(def.r*.85,def.r*.55,def.h*.4,20),mat(0x555e6e,.4,.5),def.h*.28);
+    add(new THREE.CylinderGeometry(def.r*.4,def.r*.95,def.h*.72,20,1,true),new THREE.MeshStandardMaterial({color:def.color,roughness:.35,metalness:.7,side:THREE.DoubleSide}),-def.h*.12);
+  }else if(def.kind==='srb'){
+    add(new THREE.CylinderGeometry(def.r,def.r,def.h,18),mat(def.color,.55));
+    add(new THREE.CylinderGeometry(def.r*.35,def.r*.8,.5,14,1,true),new THREE.MeshStandardMaterial({color:0x3a4252,roughness:.4,metalness:.6,side:THREE.DoubleSide}),-def.h/2-.22);
+    add(new THREE.ConeGeometry(def.r,.6,18),mat(def.color,.55),def.h/2+.3);
+  }else if(def.kind==='decoupler'){
+    add(new THREE.CylinderGeometry(def.r+.01,def.r+.01,def.h,24),mat(def.color,.5));
+  }else if(def.kind==='nose'){
+    const pts=[];for(let i=0;i<=10;i++){const t=i/10;pts.push(new THREE.Vector2(def.r*Math.cos(t*Math.PI/2),def.h*(t-.5)));}
+    add(new THREE.LatheGeometry(pts,24),mat(def.color,.4,.25));
+  }else if(def.kind==='fin'){
+    const s=new THREE.Shape();s.moveTo(0,-def.chord/2);s.lineTo(def.span,-def.chord*.42);s.lineTo(def.span,def.chord*.12);s.lineTo(0,def.chord/2);s.closePath();
+    add(new THREE.ExtrudeGeometry(s,{depth:.045,bevelEnabled:false}),mat(def.color,.45,.3));
+  }else if(def.kind==='chute'){
+    add(new THREE.CylinderGeometry(def.r,def.r*.85,def.h,16),mat(def.color,.5));
+    add(new THREE.CylinderGeometry(def.r*.5,def.r*.5,.1,16),mat(def.accent,.5),def.h/2+.04);
+    const can=new THREE.Mesh(new THREE.SphereGeometry(3.2,20,10,0,Math.PI*2,0,Math.PI/2.4),
+      new THREE.MeshStandardMaterial({color:0xff8a5c,roughness:.7,side:THREE.DoubleSide,transparent:true,opacity:.92}));
+    can.position.y=4.2;can.visible=false;can.name='canopy';g.add(can);
+  }
+  return g;
+}
+
+/* ---------- craft model ---------- */
+let craft={name:'Untitled Vehicle',parts:[]}; // parts: {uid,defId,parentUid,attach,angle,sym,y(computed),radial(bool),roff}
+let uidCounter=1;
+const P=uid=>craft.parts.find(p=>p.uid===uid);
+const defOf=p=>PARTS[p.defId];
+
+function stackChain(){ // ordered top→bottom list of stack parts
+  const root=craft.parts.find(p=>!p.parentUid);
+  if(!root)return[];
+  let chain=[root];
+  // tops above root
+  let t=craft.parts.find(p=>p.parentUid===root.uid&&p.attach==='top');
+  while(t){chain.unshift(t);t=craft.parts.find(p=>p.parentUid===t.uid&&p.attach==='top');}
+  let b=craft.parts.find(p=>p.parentUid===root.uid&&p.attach==='bottom');
+  while(b){chain.push(b);b=craft.parts.find(p=>p.parentUid===b.uid&&p.attach==='bottom');}
+  return chain;
+}
+function layout(){ // assign y positions; origin = bottom of lowest stack part
+  const chain=stackChain();if(!chain.length)return;
+  let y=0;
+  for(let i=chain.length-1;i>=0;i--){const d=defOf(chain[i]);chain[i].y=y+d.h/2;y+=d.h;}
+  for(const p of craft.parts){
+    if(p.attach==='radial'){const par=P(p.parentUid);if(par)p.y=par.y+(p.roff||0);}
+  }
+}
+function craftHeight(){const c=stackChain();return c.reduce((s,p)=>s+defOf(p).h,0);}
+function craftStats(){
+  let dry=0,fuel=0,thrust=0;
+  for(const p of craft.parts){const d=defOf(p);dry+=d.mass;fuel+=d.fuel||0;}
+  const st=computeStages();
+  if(st.length){for(const e of st[0].engines){thrust+=PARTS[P(e).defId].thrust;}}
+  const m0=dry+fuel;
+  return{parts:craft.parts.length,dry,fuel,m0,twr:thrust/(m0*G0)||0,h:craftHeight()};
+}
+/* stages: bottom-up sections split by decouplers in stack chain */
+function computeStages(){
+  const chain=stackChain();if(!chain.length)return[];
+  const sections=[];let cur=[];
+  for(const p of chain){ // top → bottom; decoupler closes the section ABOVE it
+    cur.push(p);
+    if(defOf(p).kind==='decoupler'){sections.push({parts:cur,dec:null});cur=[];}
+  }
+  if(cur.length)sections.push({parts:cur,dec:null});
+  // attach radial children to their section
+  for(const sec of sections){
+    const uids=new Set(sec.parts.map(p=>p.uid));
+    for(const p of craft.parts)if(p.attach==='radial'&&uids.has(p.parentUid))sec.parts.push(p);
+  }
+  // stages fire bottom-up: sections reversed
+  const stages=[];
+  for(let i=sections.length-1;i>=0;i--){
+    const sec=sections[i];
+    const engines=sec.parts.filter(p=>{const k=defOf(p).kind;return k==='engine'||k==='srb';}).map(p=>p.uid);
+    const dec=sec.parts.find(p=>defOf(p).kind==='decoupler');
+    const chutes=sec.parts.filter(p=>defOf(p).chute).map(p=>p.uid);
+    stages.push({sectionIdx:i,partUids:sec.parts.map(p=>p.uid),engines,decUid:dec?dec.uid:null,chutes,
+      fuel:sec.parts.reduce((s,p)=>s+((defOf(p).fuel&&!defOf(p).own)?defOf(p).fuel:0),0)});
+  }
+  return stages;
+}
+/* ================= VAB ================= */
+const vabScene=new THREE.Scene();
+vabScene.background=new THREE.Color(0x0c1220);
+vabScene.fog=new THREE.Fog(0x0c1220,45,130);
+{
+  const key=new THREE.DirectionalLight(0xffffff,.95);key.position.set(6,10,7);vabScene.add(key);
+  const fill=new THREE.DirectionalLight(0x86a7d6,.4);fill.position.set(-7,4,-5);vabScene.add(fill);
+  vabScene.add(new THREE.AmbientLight(0x314055,.9));
+  const grid=new THREE.GridHelper(80,40,0x2a3a58,0x1a2438);vabScene.add(grid);
+  const pad=new THREE.Mesh(new THREE.CylinderGeometry(4.5,4.5,.25,36),mat(0x1b2436,.8));pad.position.y=-.13;vabScene.add(pad);
+  const ring=new THREE.Mesh(new THREE.TorusGeometry(4.5,.05,8,48),mat(0xffb454,.5));ring.rotation.x=Math.PI/2;ring.position.y=0;vabScene.add(ring);
+}
+const vabGroup=new THREE.Group();vabScene.add(vabGroup);
+
+/* orbiting camera (custom, no OrbitControls in r128 build) */
+function makeOrbitCam(){
+  return {az:.6,el:.25,dist:14,tgt:new THREE.Vector3(0,4,0),min:3,max:80,
+    apply(cam,up){ // up: optional world-up vector for flight
+      const e=clamp(this.el,-1.45,1.45);
+      const local=new THREE.Vector3(Math.cos(e)*Math.sin(this.az),Math.sin(e),Math.cos(e)*Math.cos(this.az)).multiplyScalar(this.dist);
+      if(up){
+        const q=new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,1,0),up);
+        local.applyQuaternion(q);cam.up.copy(up);
+      }else cam.up.set(0,1,0);
+      cam.position.copy(this.tgt).add(local);
+      cam.lookAt(this.tgt);
+    }};
+}
+const vabCam=makeOrbitCam();
+let flightCam=makeOrbitCam();flightCam.dist=22;flightCam.tgt=new THREE.Vector3(0,0,0);flightCam.max=400;
+
+/* pointer handling shared */
+let dragging=false,px=0,py=0,moved=0;
+const glc=$('gl');
+function activeCam(){return screenNow==='vab'?vabCam:flightCam;}
+glc.addEventListener('pointerdown',e=>{dragging=true;moved=0;px=e.clientX;py=e.clientY;glc.setPointerCapture(e.pointerId);});
+glc.addEventListener('pointermove',e=>{
+  if(!dragging)return;const dx=e.clientX-px,dy=e.clientY-py;px=e.clientX;py=e.clientY;moved+=Math.abs(dx)+Math.abs(dy);
+  const c=activeCam();c.az-=dx*.006;c.el+=dy*.006;
+});
+glc.addEventListener('pointerup',e=>{dragging=false;if(moved<6&&screenNow==='vab')vabPick(e);});
+glc.addEventListener('wheel',e=>{const c=activeCam();c.dist=clamp(c.dist*(e.deltaY>0?1.12:.9),c.min,c.max);},{passive:true});
+/* pinch zoom */
+let pinchD=0;
+glc.addEventListener('touchmove',e=>{if(e.touches.length===2){const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+  if(pinchD){const c=activeCam();c.dist=clamp(c.dist*pinchD/d,c.min,c.max);}pinchD=d;}},{passive:true});
+glc.addEventListener('touchend',()=>pinchD=0);
+
+/* VAB state */
+let selectedUid=null,symCount=2;
+const partMeshMap=new Map(); // uid -> mesh group
+
+function rebuildVabMeshes(){
+  layout();
+  while(vabGroup.children.length)vabGroup.remove(vabGroup.children[0]);
+  partMeshMap.clear();
+  for(const p of craft.parts){
+    const d=defOf(p),g=buildPartMesh(d);
+    if(p.attach==='radial'){
+      const par=P(p.parentUid),pr=par?defOf(par).r||.62:.62;
+      if(d.kind==='fin'){g.position.set(Math.cos(p.angle)*pr,p.y,Math.sin(p.angle)*pr);g.rotation.y=-p.angle;}
+      else{g.position.set(Math.cos(p.angle)*(pr+d.r),p.y,Math.sin(p.angle)*(pr+d.r));}
+    }else g.position.set(0,p.y,0);
+    g.userData.uid=p.uid;
+    if(p.uid===selectedUid){
+      g.traverse(o=>{if(o.isMesh){o.material=o.material.clone();o.material.emissive=new THREE.Color(0xffb454);o.material.emissiveIntensity=.35;}});
+    }
+    partMeshMap.set(p.uid,g);vabGroup.add(g);
+  }
+  vabCam.tgt.set(0,craftHeight()/2||3,0);
+  updateVabPanels();
+}
+const ray=new THREE.Raycaster();
+function vabPick(e){
+  const m=new THREE.Vector2((e.clientX/innerWidth)*2-1,-(e.clientY/innerHeight)*2+1);
+  ray.setFromCamera(m,camera);
+  const hits=ray.intersectObjects(vabGroup.children,true);
+  if(hits.length){let o=hits[0].object;while(o&&o.userData.uid===undefined)o=o.parent;
+    if(o){selectedUid=o.userData.uid;rebuildVabMeshes();return;}}
+  selectedUid=null;rebuildVabMeshes();
+}
+
+function addPart(defId){
+  const d=PARTS[defId];
+  if(!craft.parts.length){
+    if(d.attach==='radial'||d.attach==='top'){toast('Start with a command pod or stack part','warn');return;}
+    craft.parts.push({uid:uidCounter++,defId,parentUid:null,attach:'root'});
+    selectedUid=craft.parts[0].uid;rebuildVabMeshes();return;
+  }
+  const chain=stackChain();
+  if(d.attach==='top'){
+    const top=chain[0];
+    if(craft.parts.some(p=>p.parentUid===top.uid&&p.attach==='top')){toast('Top node occupied','warn');return;}
+    craft.parts.push({uid:uidCounter++,defId,parentUid:top.uid,attach:'top'});
+  }else if(d.attach==='stack'){
+    const bot=chain[chain.length-1];
+    craft.parts.push({uid:uidCounter++,defId,parentUid:bot.uid,attach:'bottom'});
+  }else{ // radial
+    let host=selectedUid?P(selectedUid):null;
+    if(!host||host.attach==='radial')host=chain.reduce((a,b)=>defOf(b).kind==='tank'?b:a,chain[Math.floor(chain.length/2)]);
+    const gid='g'+uidCounter;
+    const baseAngle=Math.random()*0; // deterministic 0
+    for(let k=0;k<symCount;k++){
+      craft.parts.push({uid:uidCounter++,defId,parentUid:host.uid,attach:'radial',
+        angle:baseAngle+k*2*Math.PI/symCount,sym:gid,roff:d.kind==='fin'?-(defOf(host).h/2-(d.chord||1)/2)+0.05: (d.kind==='srb'? -(defOf(host).h/2)+d.h/2 : 0)});
+    }
+  }
+  rebuildVabMeshes();
+}
+function removeSelected(){
+  if(selectedUid==null)return;
+  const p=P(selectedUid);if(!p)return;
+  const doomed=new Set();
+  const collect=u=>{doomed.add(u);for(const c of craft.parts)if(c.parentUid===u)collect(c.uid);};
+  if(p.sym){for(const s of craft.parts)if(s.sym===p.sym)collect(s.uid);}else collect(p.uid);
+  craft.parts=craft.parts.filter(x=>!doomed.has(x.uid));
+  selectedUid=null;rebuildVabMeshes();
+}
+
+/* panels */
+function updateVabPanels(){
+  const s=craftStats();
+  $('vStats').innerHTML=
+    `<div class="statrow"><span>Parts</span><b>${s.parts}</b></div>
+     <div class="statrow"><span>Height</span><b>${fmt(s.h,1)} m</b></div>
+     <div class="statrow"><span>Dry mass</span><b>${fmt(s.dry/1000,2)} t</b></div>
+     <div class="statrow"><span>Fuel</span><b>${fmt(s.fuel)} u</b></div>
+     <div class="statrow"><span>Launch mass</span><b>${fmt(s.m0/1000,2)} t</b></div>
+     <div class="statrow"><span>Liftoff TWR</span><b style="color:${s.twr>1?'var(--green)':'var(--red)'}">${fmt(s.twr,2)}</b></div>`;
+  const sel=selectedUid?P(selectedUid):null;
+  $('selInfo').textContent=sel?`Selected: ${defOf(sel).name}${sel.sym?' (symmetry group)':''} — radial parts attach here.`:'Nothing selected. Radial parts attach to the selected stack part.';
+  const st=computeStages();
+  $('stageList').innerHTML=st.map((sg,i)=>{
+    const eng=sg.engines.map(u=>PARTS[P(u).defId].name);
+    const bits=[];
+    if(sg.decUid)bits.push('separate below');
+    if(eng.length)bits.push('ignite '+eng.join(', '));
+    if(sg.chutes.length)bits.push('parachutes armed');
+    return `<div class="stage-card"><span class="eyebrow">Stage ${i+1}</span><div>${bits.join(' · ')||'—'}</div><div>${sg.fuel?fmt(sg.fuel)+' u fuel':''}</div></div>`;
+  }).join('')||'<div style="color:var(--dim);font-size:12px;margin-top:6px">Add parts to generate staging.</div>';
+}
+
+/* catalog DOM */
+function buildCatalog(){
+  const cats={};
+  for(const k in PARTS){const d=PARTS[k];(cats[d.cat]=cats[d.cat]||[]).push(d);}
+  $('catList').innerHTML='';
+  for(const c in cats){
+    const g=document.createElement('div');g.className='cat-group';
+    g.innerHTML=`<div class="eyebrow">${c}</div>`;
+    for(const d of cats[c]){
+      const b=document.createElement('button');b.className='part-btn';
+      const col='#'+d.color.toString(16).padStart(6,'0');
+      const st=d.thrust?`${fmt(d.thrust/1000)} kN · isp ${d.isp}`:d.fuel?`${fmt(d.fuel)} u fuel`:d.liftA?`lift ${d.liftA}`:d.chute?'drag canopy':`${fmt(d.mass)} kg`;
+      b.innerHTML=`<span class="sw" style="background:${col}"></span><span><div class="nm">${d.name}</div><div class="st">${st}</div></span>`;
+      b.onclick=()=>addPart(d.id);
+      g.appendChild(b);
+    }
+    $('catList').appendChild(g);
+  }
+}
+$('symRow').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+  symCount=+b.dataset.s;for(const x of $('symRow').children)x.classList.toggle('on',x===b);});
+$('delPart').onclick=removeSelected;
+$('vClear').onclick=()=>{craft.parts=[];selectedUid=null;rebuildVabMeshes();};
+
+/* craft save/load */
+$('vSave').onclick=()=>{
+  craft.name=$('craftName').value.trim()||'Untitled Vehicle';
+  const all=LS.crafts();all[craft.name]={parts:craft.parts,uidCounter,date:Date.now()};LS.setCrafts(all);
+  toast(`Saved "${craft.name}"`,'good');
+};
+function openCraftList(intoVab){
+  const all=LS.crafts(),body=$('saveModalBody');
+  $('saveModalTitle').textContent='Saved vehicles';
+  const names=Object.keys(all);
+  body.innerHTML=names.length?'':'<div style="color:var(--dim)">No saved vehicles yet.</div>';
+  for(const n of names){
+    const row=document.createElement('div');row.className='saveitem';
+    row.innerHTML=`<span class="nm">${n}<div class="meta">${all[n].parts.length} parts · ${new Date(all[n].date).toLocaleDateString()}</div></span>`;
+    const lb=document.createElement('button');lb.textContent='Load';lb.className='primary';
+    lb.onclick=()=>{loadCraft(n);$('saveModal').classList.remove('on');if(intoVab)showScreen('vab');};
+    const db=document.createElement('button');db.textContent='✕';db.className='danger';
+    db.onclick=()=>{delete all[n];LS.setCrafts(all);openCraftList(intoVab);};
+    row.append(lb,db);body.appendChild(row);
+  }
+  $('saveModal').classList.add('on');
+}
+function loadCraft(name){
+  const all=LS.crafts();if(!all[name])return;
+  craft={name,parts:JSON.parse(JSON.stringify(all[name].parts))};
+  uidCounter=all[name].uidCounter||Math.max(0,...craft.parts.map(p=>p.uid))+1;
+  $('craftName').value=name;selectedUid=null;rebuildVabMeshes();
+}
+$('vLoad').onclick=()=>openCraftList(true);
+$('smClose').onclick=()=>$('saveModal').classList.remove('on');
+/* ================= FLIGHT ================= */
+const fScene=new THREE.Scene();
+{
+  const sun=new THREE.DirectionalLight(0xfff4e0,1.15);sun.position.set(1,0.35,0.4).normalize();fScene.add(sun);
+  fScene.add(new THREE.AmbientLight(0x223048,.8));
+  // stars
+  const sg=new THREE.BufferGeometry(),N=1600,pos=new Float32Array(N*3);
+  for(let i=0;i<N;i++){const u=Math.random()*2-1,th=Math.random()*Math.PI*2,s=Math.sqrt(1-u*u);
+    const v=new THREE.Vector3(s*Math.cos(th),u,s*Math.sin(th)).multiplyScalar(3.5e6);pos.set([v.x,v.y,v.z],i*3);}
+  sg.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  fScene.add(new THREE.Points(sg,new THREE.PointsMaterial({color:0xbfd0e6,size:2,sizeAttenuation:false})));
+}
+const world=new THREE.Group();fScene.add(world); // holds planet-fixed things, offset by -vessel pos each frame
+const planetMesh=new THREE.Mesh(new THREE.SphereGeometry(R_P,96,64),
+  new THREE.MeshStandardMaterial({color:0x30506e,roughness:.95,flatShading:false}));
+world.add(planetMesh);
+const atmoMesh=new THREE.Mesh(new THREE.SphereGeometry(R_P+ATMO_H*.85,64,42),
+  new THREE.MeshBasicMaterial({color:0x4f8fd8,transparent:true,opacity:.13,side:THREE.BackSide,depthWrite:false}));
+world.add(atmoMesh);
+/* local ground patch + pad (near-surface detail) */
+const groundPatch=new THREE.Mesh(new THREE.CircleGeometry(3000,64),mat(0x3c5c46,.95));
+world.add(groundPatch);
+const padGroup=new THREE.Group();
+{
+  const slab=new THREE.Mesh(new THREE.CylinderGeometry(9,10,.3,28),mat(0x39414f,.85));slab.position.y=-.15;padGroup.add(slab);
+  const tower=new THREE.Mesh(new THREE.BoxGeometry(1.2,16,1.2),mat(0x8a5a2b,.7));tower.position.set(5.4,8,0);padGroup.add(tower);
+  const stripe=new THREE.Mesh(new THREE.TorusGeometry(8.4,.12,6,40),mat(0xffb454,.5));stripe.rotation.x=Math.PI/2;stripe.position.y=.02;padGroup.add(stripe);
+}
+world.add(padGroup);
+const vesselGroup=new THREE.Group();fScene.add(vesselGroup); // at origin, rotated by q
+const debrisGroup=new THREE.Group();world.add(debrisGroup);
+
+const PAD_POS=new THREE.Vector3(R_P,0,0); // up = +X, east = +Z
+const PAD_UP=new THREE.Vector3(1,0,0);
+
+/* ---------- vessel physics state ---------- */
+let V=null; // vessel
+const tmpV=new THREE.Vector3(),tmpV2=new THREE.Vector3(),tmpQ=new THREE.Quaternion();
+
+function buildVessel(){
+  layout();
+  const stages=computeStages();
+  const parts=craft.parts.map(p=>{
+    const d=defOf(p);
+    let bp; // body position (body frame: +Y up along stack, origin at CoM later — first at stack origin)
+    if(p.attach==='radial'){const par=P(p.parentUid),pr=par?defOf(par).r||.62:.62;
+      const rr=d.kind==='fin'?pr+ (d.span||0)*.5 : pr+(d.r||0);
+      bp=new THREE.Vector3(Math.cos(p.angle)*rr,p.y,Math.sin(p.angle)*rr);
+    }else bp=new THREE.Vector3(0,p.y,0);
+    return{uid:p.uid,def:d,body:bp,alive:true,srbFuel:d.own?d.fuel:0,lit:false,chuteOut:false,craftP:p};
+  });
+  // stage fuel pools
+  const stFuel=stages.map(s=>s.fuel);
+  const h=craftHeight();
+  const startPos=PAD_POS.clone(); // corrected after mass props below
+  V={parts,stages,stFuel,stageIdx:-1, // -1 = pre-launch; first space fires stage 0
+    pos:startPos,vel:new THREE.Vector3(0,0,0),
+    q:new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,1,0),PAD_UP),
+    w:new THREE.Vector3(),throttle:0,sas:true,met:0,landed:true,dead:false,
+    com:0,mass:0,inertia:1,warp:1,chutesArmed:false};
+  recalcMassProps();
+  V.pos=PAD_POS.clone().add(PAD_UP.clone().multiplyScalar(V.com+0.05));
+  buildVesselMeshes();
+}
+function alive(){return V.parts.filter(p=>p.alive);}
+function recalcMassProps(){
+  let m=0,my=0;
+  for(const p of alive()){
+    let pm=p.def.mass+(p.srbFuel||0);
+    m+=pm;my+=pm*p.body.y;
+  }
+  for(let i=0;i<V.stages.length;i++){ // liquid fuel mass attributed to stage tanks' mean y (approx: use stage tank parts)
+    const f=V.stFuel[i];if(f<=0)continue;
+    const tanks=V.stages[i].partUids.map(u=>V.parts.find(x=>x.uid===u)).filter(p=>p&&p.alive&&p.def.fuel&&!p.def.own);
+    if(!tanks.length)continue;
+    const per=f/tanks.length;
+    for(const t of tanks){m+=per;my+=per*t.body.y;}
+  }
+  V.mass=Math.max(m,1);V.com=my/V.mass;
+  let I=0;for(const p of alive()){const dm=p.def.mass+(p.srbFuel||0);const dz=p.body.y-V.com;I+=dm*(dz*dz+0.4);}
+  V.inertia=Math.max(I,50);
+}
+function stageOfPart(uid){for(let i=0;i<V.stages.length;i++)if(V.stages[i].partUids.includes(uid))return i;return -1;}
+
+/* meshes */
+const flames=new Map();
+function buildVesselMeshes(){
+  while(vesselGroup.children.length)vesselGroup.remove(vesselGroup.children[0]);
+  flames.clear();
+  for(const p of V.parts){
+    const g=buildPartMesh(p.def);
+    g.position.copy(p.body);
+    if(p.craftP.attach==='radial'&&p.def.kind==='fin'){
+      const par=P(p.craftP.parentUid),pr=par?(defOf(par).r||.62):.62;
+      g.rotation.y=-p.craftP.angle;
+      g.position.set(Math.cos(p.craftP.angle)*pr,p.body.y,Math.sin(p.craftP.angle)*pr);
+    }
+    p.mesh=g;vesselGroup.add(g);
+    if(p.def.thrust){
+      const fl=new THREE.Mesh(new THREE.ConeGeometry(p.def.kind==='srb'?.3:.42,3,12,1,true),
+        new THREE.MeshBasicMaterial({color:0xffc06a,transparent:true,opacity:.9,blending:THREE.AdditiveBlending,depthWrite:false}));
+      fl.rotation.x=Math.PI;fl.position.set(p.body.x,p.body.y-(p.def.h/2)-1.4,p.body.z);fl.visible=false;
+      vesselGroup.add(fl);flames.set(p.uid,fl);
+    }
+  }
+}
+
+/* ---------- physics ---------- */
+const input={pitch:0,yaw:0,roll:0};
+const keys={};
+function localUp(){return tmpV.copy(V.pos).normalize().clone();}
+function altitude(){return V.pos.length()-R_P;}
+
+function physStep(dt){
+  if(V.dead)return;
+  const r=V.pos.length(),up=V.pos.clone().normalize(),h=r-R_P;
+  const rho=rhoAt(h);
+  const F=new THREE.Vector3(),T=new THREE.Vector3(); // world force, body torque
+  // gravity
+  F.add(up.clone().multiplyScalar(-GM*V.mass/(r*r)));
+  // engines
+  const bodyY=new THREE.Vector3(0,1,0).applyQuaternion(V.q);
+  const qInv=V.q.clone().invert();
+  const wBody=V.w.clone().applyQuaternion(qInv);
+  let anyThrust=false;
+  for(const p of alive()){
+    if(!p.def.thrust||!p.lit)continue;
+    let th=0;
+    if(p.def.own){ if(p.srbFuel>0){th=p.def.thrust;p.srbFuel-=dt*p.def.thrust/(p.def.isp*G0);if(p.srbFuel<=0){p.srbFuel=0;toast(p.def.name+' burnout','warn');}}}
+    else{
+      const si=stageOfPart(p.uid);
+      if(si>=0&&V.stFuel[si]>0&&V.throttle>0){th=p.def.thrust*V.throttle;V.stFuel[si]-=dt*th/(p.def.isp*G0);if(V.stFuel[si]<=0){V.stFuel[si]=0;toast('Stage fuel depleted','warn');}}
+    }
+    const fl=flames.get(p.uid);
+    if(fl){fl.visible=th>0;const s=th/p.def.thrust;fl.scale.set(s*(0.9+Math.random()*.2),s*(0.85+Math.random()*.35),s);}
+    if(th<=0)continue;anyThrust=true;
+    const gm=(p.def.gimbal||0)*Math.PI/180;
+    const fB=new THREE.Vector3(Math.sin(-input.yaw*gm),1,Math.sin(-input.pitch*gm)).normalize().multiplyScalar(th);
+    F.add(fB.clone().applyQuaternion(V.q));
+    const rB=p.body.clone().sub(new THREE.Vector3(0,V.com,0));
+    T.add(rB.clone().cross(fB)); // body torque
+  }
+  // aero (per part, includes rotational airflow => damping)
+  if(rho>1e-7){
+    const qWorldInv=qInv;
+    for(const p of alive()){
+      const rB=p.body.clone().sub(new THREE.Vector3(0,V.com,0));
+      const vRot=wBody.clone().cross(rB).applyQuaternion(V.q); // part velocity from rotation, world
+      const vAir=V.vel.clone().add(vRot);
+      const sp=vAir.length();if(sp<1e-3)continue;
+      const wHat=vAir.clone().normalize();
+      const area=p.def.liftA?p.def.liftA*.4:(p.def.r||.5)*(p.def.r||.5)*Math.PI*.5;
+      let cd=p.def.cd??.3, aEff=area;
+      if(p.chuteOut){cd=1.4;aEff=110;}
+      const dragMag=.5*rho*cd*aEff*sp*sp;
+      const Fd=wHat.clone().multiplyScalar(-dragMag);
+      F.add(Fd);
+      T.add(rB.clone().cross(Fd.clone().applyQuaternion(qWorldInv)));
+      if(p.def.liftA){
+        const axis=bodyY;
+        const cosA=clamp(axis.dot(wHat),-1,1);
+        const alpha=Math.acos(Math.abs(cosA));
+        let cl=Math.sin(2*alpha);if(alpha>0.5)cl*=Math.max(0,1-(alpha-0.5)*1.6); // stall
+        const dirL=axis.clone().sub(wHat.clone().multiplyScalar(cosA));
+        if(dirL.lengthSq()>1e-8){
+          dirL.normalize();
+          const Fl=dirL.multiplyScalar(.5*rho*p.def.liftA*cl*sp*sp*(cosA<0?-1:1));
+          F.add(Fl);
+          T.add(rB.clone().cross(Fl.clone().applyQuaternion(qWorldInv)));
+        }
+      }
+    }
+  }
+  // reaction wheels + SAS
+  let ctlT=0;for(const p of alive())ctlT+=p.def.torque||0;
+  const cmd=new THREE.Vector3(-input.pitch,input.roll,-input.yaw); // body axes
+  if(V.sas&&cmd.lengthSq()<1e-6)cmd.copy(wBody).multiplyScalar(-3.2).clampLength(0,1);
+  T.add(cmd.multiplyScalar(ctlT));
+  T.add(wBody.clone().multiplyScalar(-0.15*ctlT)); // passive damp
+  // integrate (convert body torque to world)
+  T.applyQuaternion(V.q);
+  V.vel.add(F.multiplyScalar(dt/V.mass));
+  V.w.add(T.multiplyScalar(dt/V.inertia));
+  V.w.clampLength(0,4);
+  const wq=new THREE.Quaternion(V.w.x*dt/2,V.w.y*dt/2,V.w.z*dt/2,0).multiply(V.q);
+  V.q.set(V.q.x+wq.x,V.q.y+wq.y,V.q.z+wq.z,V.q.w+wq.w).normalize();
+  V.pos.add(V.vel.clone().multiplyScalar(dt));
+  V.met+=dt;
+  V.mAcc=(V.mAcc||0)+dt;if(V.mAcc>0.25){V.mAcc=0;recalcMassProps();}
+  // ground
+  const bottom=0-V.com; // body y of stack bottom relative CoM
+  const clearance=V.pos.length()-R_P-(-bottom); // rough: keep CoM at R+comHeight
+  if(V.pos.length()<R_P+V.com+0.05){
+    const vspeed=V.vel.dot(up);
+    const hspeed=V.vel.clone().sub(up.clone().multiplyScalar(vspeed)).length();
+    if(!V.landed&&(Math.abs(vspeed)>10||hspeed>14)){destroy('Impact at '+fmt(V.vel.length())+' m/s');return;}
+    V.pos.setLength(R_P+V.com+0.05);
+    if(vspeed<0)V.vel.sub(up.clone().multiplyScalar(vspeed));
+    V.vel.multiplyScalar(Math.max(0,1-3*dt)); // ground friction
+    V.w.multiplyScalar(Math.max(0,1-3*dt));
+    if(V.vel.length()<0.4&&!anyThrust){V.vel.set(0,0,0);V.landed=true;}
+  }else if(V.pos.length()>R_P+V.com+1)V.landed=false;
+  V.lastG=F.length()/V.mass/G0;
+}
+
+function fireStage(){
+  if(V.dead)return;
+  const next=V.stageIdx+1;
+  if(next>=V.stages.length){ // final: chutes anywhere
+    deployChutes();return;
+  }
+  const sg=V.stages[next];
+  // decoupler of *this stage's* section separates everything below it
+  if(sg.decUid!=null){
+    const dec=V.parts.find(p=>p.uid===sg.decUid);
+    // parts below decoupler y => previous sections
+    const cut=dec.body.y;
+    const dropped=alive().filter(p=>p.body.y<cut-0.01);
+    spawnDebris(dropped);
+    for(const p of dropped)p.alive=false,p.mesh&&(p.mesh.visible=false);
+    dec.alive=false;if(dec.mesh)dec.mesh.visible=false;
+    toast('Stage separation','good');
+  }
+  for(const u of sg.engines){const p=V.parts.find(x=>x.uid===u);if(p&&p.alive){p.lit=true;}}
+  if(sg.engines.length)toast('Ignition — '+sg.engines.length+' engine(s)','good');
+  if(sg.chutes.length&&next===V.stages.length-1)V.chutesArmed=true;
+  V.stageIdx=next;
+  if(V.throttle===0&&sg.engines.length)V.throttle=1;
+  recalcMassProps();updateStagePanel();
+}
+function deployChutes(){
+  let n=0;
+  for(const p of alive())if(p.def.chute&&!p.chuteOut){p.chuteOut=true;n++;
+    const can=p.mesh&&p.mesh.getObjectByName('canopy');if(can)can.visible=true;}
+  if(n)toast('Parachute deployed','good');else toast('Nothing left to stage','warn');
+  recalcMassProps();
+}
+function spawnDebris(parts){
+  if(!parts.length)return;
+  const g=new THREE.Group();
+  for(const p of parts){const m=buildPartMesh(p.def);m.position.copy(p.body);g.add(m);}
+  const worldPos=V.pos.clone();
+  g.userData={vel:V.vel.clone().add(localUp().multiplyScalar(-2)),pos:worldPos,q:V.q.clone(),t:0};
+  debrisGroup.add(g);
+}
+function stepDebris(dt){
+  for(const g of[...debrisGroup.children]){
+    const u=g.userData;u.t+=dt;
+    const r=u.pos.length(),up=u.pos.clone().normalize(),h=r-R_P;
+    u.vel.add(up.clone().multiplyScalar(-GM/(r*r)*dt));
+    const rho=rhoAt(h);if(rho>0)u.vel.multiplyScalar(Math.max(0,1-rho*0.02*u.vel.length()*dt));
+    u.pos.add(u.vel.clone().multiplyScalar(dt));
+    if(u.t>90||u.pos.length()<R_P+1)debrisGroup.remove(g);
+  }
+}
+function destroy(msg){
+  V.dead=true;V.throttle=0;
+  vesselGroup.visible=false;
+  $('deadSub').textContent=msg+'.';
+  $('deadPanel').style.display='flex';
+}
+
+/* orbit elements */
+function orbitInfo(){
+  const r=V.pos.length(),v2=V.vel.lengthSq();
+  const eps=v2/2-GM/r,a=-GM/(2*eps);
+  const hv=V.pos.clone().cross(V.vel);
+  const ev=V.vel.clone().cross(hv).divideScalar(GM).sub(V.pos.clone().normalize());
+  const e=ev.length();
+  let ap=null,pe=null;
+  if(eps<0){ap=a*(1+e)-R_P;pe=a*(1-e)-R_P;}
+  else{pe=a*(1-e)-R_P;}
+  return{a,e,ev,hv,ap,pe,eps};
+}
+/* ================= HUD, MAP, LOOP, GLUE ================= */
+let screenNow='menu';
+function showScreen(s){
+  screenNow=s;
+  for(const id of['menu','vab','flight'])$(id).classList.toggle('active',id===s);
+  if(s==='vab')rebuildVabMeshes();
+}
+function toast(text,cls=''){
+  const d=document.createElement('div');d.className='msg '+cls;d.textContent=text;
+  $('msgFeed').appendChild(d);setTimeout(()=>d.remove(),4200);
+}
+
+/* warp */
+const WARPS=[1,2,5,20,60,150];
+function buildWarpRow(){
+  $('warpRow').innerHTML='';
+  WARPS.forEach(w=>{const b=document.createElement('button');b.textContent=w+'×';
+    b.onclick=()=>setWarp(w);b.dataset.w=w;$('warpRow').appendChild(b);});
+  setWarp(1);
+}
+function setWarp(w){
+  if(V){ if(w>5&&altitude()<ATMO_H){toast('High warp only above atmosphere','warn');w=Math.min(w,5);} V.warp=w;}
+  for(const b of $('warpRow').children)b.classList.toggle('on',+b.dataset.w===w);
+}
+
+/* stage panel (flight) */
+function updateStagePanel(){
+  if(!V)return;
+  $('fStages').innerHTML=V.stages.map((sg,i)=>{
+    const done=i<=V.stageIdx;
+    const eng=sg.engines.length?sg.engines.length+' engine(s)':'';
+    const dec=sg.decUid?'separation':'';
+    const ch=sg.chutes.length?'chutes':'';
+    const fu=sg.fuel?` · ${fmt(Math.max(0,V.stFuel[i]))}u`:'';
+    return `<div class="stage-card" style="opacity:${done?.45:1}"><span class="eyebrow">Stage ${i+1}${done?' ✓':''}</span><div>${[dec,eng,ch].filter(Boolean).join(' · ')||'—'}${fu}</div></div>`;
+  }).join('');
+}
+
+/* navball */
+const nb=$('navball'),nctx=nb.getContext('2d');
+function drawNavball(){
+  const S=264,cx=S/2,cy=S/2,R=S/2-8;
+  nctx.clearRect(0,0,S,S);
+  nctx.save();nctx.beginPath();nctx.arc(cx,cy,R,0,7);nctx.clip();
+  const up=V.pos.clone().normalize();
+  const fwd=new THREE.Vector3(0,1,0).applyQuaternion(V.q);
+  const pitch=Math.asin(clamp(fwd.dot(up),-1,1)); // rad
+  // roll: project body z onto horizon plane
+  const east=new THREE.Vector3(0,0,1).sub(up.clone().multiplyScalar(up.z)).normalize();
+  const north=up.clone().cross(east);
+  const bodyX=new THREE.Vector3(1,0,0).applyQuaternion(V.q);
+  const roll=Math.atan2(bodyX.dot(up),bodyX.clone().sub(up.clone().multiplyScalar(bodyX.dot(up))).length()*Math.sign(1));
+  const pxPerRad=R/(Math.PI/2.2);
+  nctx.translate(cx,cy);nctx.rotate(-roll);
+  const hy=pitch*pxPerRad;
+  nctx.fillStyle='#17293f';nctx.fillRect(-S,hy-S*2,S*2,S*2); // sky
+  nctx.fillStyle='#4a3520';nctx.fillRect(-S,hy,S*2,S*2); // ground
+  nctx.strokeStyle='#e8edf4';nctx.lineWidth=2;nctx.beginPath();nctx.moveTo(-S,hy);nctx.lineTo(S,hy);nctx.stroke();
+  nctx.strokeStyle='rgba(232,237,244,.35)';nctx.lineWidth=1;nctx.font='9px ui-monospace';nctx.fillStyle='rgba(232,237,244,.6)';
+  for(let d=-80;d<=80;d+=20){if(!d)continue;const y=hy+(-d*Math.PI/180)*pxPerRad;
+    nctx.beginPath();nctx.moveTo(-26,y);nctx.lineTo(26,y);nctx.stroke();nctx.fillText(d,30,y+3);}
+  nctx.restore();
+  // prograde marker
+  const vel=V.vel.length()>1?V.vel.clone().normalize():null;
+  if(vel){
+    const upP=vel.dot(up);const pitV=Math.asin(clamp(upP,-1,1));
+    const dyp=(pitch-pitV)*R/(Math.PI/2.2);
+    if(Math.abs(dyp)<R-14){
+      nctx.strokeStyle='#7ee2a8';nctx.lineWidth=2;
+      nctx.beginPath();nctx.arc(cx,cy+dyp,7,0,7);nctx.moveTo(cx-13,cy+dyp);nctx.lineTo(cx-7,cy+dyp);
+      nctx.moveTo(cx+7,cy+dyp);nctx.lineTo(cx+13,cy+dyp);nctx.moveTo(cx,cy+dyp-13);nctx.lineTo(cx,cy+dyp-7);nctx.stroke();
+    }
+  }
+  // fixed vehicle marker
+  nctx.strokeStyle='#ffb454';nctx.lineWidth=2.5;
+  nctx.beginPath();nctx.moveTo(cx-22,cy);nctx.lineTo(cx-8,cy);nctx.lineTo(cx,cy+7);nctx.lineTo(cx+8,cy);nctx.lineTo(cx+22,cy);nctx.stroke();
+  nctx.strokeStyle='#22304a';nctx.lineWidth=3;nctx.beginPath();nctx.arc(cx,cy,R,0,7);nctx.stroke();
+  return pitch;
+}
+
+/* map */
+const mapC=$('mapCanvas'),mctx=mapC.getContext('2d');
+let mapOn=false,mapZoom=1;
+function toggleMap(){mapOn=!mapOn;$('mapWrap').classList.toggle('on',mapOn);}
+$('mapCanvas').addEventListener('wheel',e=>{mapZoom=clamp(mapZoom*(e.deltaY>0?1.15:.87),.3,8);},{passive:true});
+function drawMap(){
+  mapC.width=innerWidth;mapC.height=innerHeight;
+  const cx=innerWidth/2,cy=innerHeight/2;
+  const oi=orbitInfo();
+  const extent=Math.max(R_P*2.4,(oi.ap!=null?(oi.ap+R_P)*2.3:R_P*3));
+  const sc=Math.min(innerWidth,innerHeight)/extent*mapZoom;
+  // orbital plane basis
+  const hHat=oi.hv.lengthSq()>1e-6?oi.hv.clone().normalize():new THREE.Vector3(0,1,0);
+  let eHat=oi.e>1e-4?oi.ev.clone().normalize():V.pos.clone().normalize();
+  eHat.sub(hHat.clone().multiplyScalar(eHat.dot(hHat))).normalize();
+  const pHat=hHat.clone().cross(eHat);
+  const proj=v=>[cx+v.dot(eHat)*sc,cy-v.dot(pHat)*sc];
+  mctx.fillStyle='#070a10';mctx.fillRect(0,0,innerWidth,innerHeight);
+  // atmosphere + planet
+  mctx.beginPath();mctx.arc(cx,cy,(R_P+ATMO_H)*sc,0,7);mctx.fillStyle='rgba(79,143,216,.12)';mctx.fill();
+  mctx.beginPath();mctx.arc(cx,cy,R_P*sc,0,7);mctx.fillStyle='#2b4b66';mctx.fill();
+  mctx.strokeStyle='#3f6a8d';mctx.stroke();
+  // orbit path
+  if(oi.eps<0&&oi.e<0.9999){
+    mctx.beginPath();
+    for(let i=0;i<=180;i++){const th=i/180*Math.PI*2;
+      const rr=oi.a*(1-oi.e*oi.e)/(1+oi.e*Math.cos(th));
+      const pt=eHat.clone().multiplyScalar(rr*Math.cos(th)).add(pHat.clone().multiplyScalar(rr*Math.sin(th)));
+      const[x,y]=proj(pt);i?mctx.lineTo(x,y):mctx.moveTo(x,y);}
+    mctx.closePath();mctx.strokeStyle='#7dd3fc';mctx.lineWidth=1.6;mctx.stroke();
+    // Ap/Pe markers
+    const pePt=eHat.clone().multiplyScalar(oi.a*(1-oi.e));const apPt=eHat.clone().multiplyScalar(-oi.a*(1+oi.e));
+    for(const[pt,lab,val]of[[pePt,'Pe',oi.pe],[apPt,'Ap',oi.ap]]){
+      const[x,y]=proj(pt);mctx.fillStyle='#ffb454';mctx.beginPath();mctx.arc(x,y,4,0,7);mctx.fill();
+      mctx.font='11px ui-monospace';mctx.fillText(lab+' '+fmtDist(val),x+7,y+4);}
+  }else{ // hyperbolic/suborbital escape: draw short propagated arc
+    mctx.beginPath();let p=V.pos.clone(),vv=V.vel.clone();
+    for(let i=0;i<400;i++){const rr=p.length();vv.add(p.clone().normalize().multiplyScalar(-GM/(rr*rr)*8));p.add(vv.clone().multiplyScalar(8));
+      const[x,y]=proj(p);i?mctx.lineTo(x,y):mctx.moveTo(x,y);if(rr<R_P)break;}
+    mctx.strokeStyle='#7dd3fc';mctx.stroke();
+  }
+  const[vx,vy]=proj(V.pos);
+  mctx.fillStyle='#ffb454';mctx.beginPath();mctx.moveTo(vx,vy-6);mctx.lineTo(vx+5,vy+5);mctx.lineTo(vx-5,vy+5);mctx.closePath();mctx.fill();
+  $('mapInfo').innerHTML=`Ap ${oi.ap!=null?fmtDist(oi.ap):'—'}<br>Pe ${oi.pe!=null?fmtDist(oi.pe):'—'}<br>e ${oi.e.toFixed(3)}<br>${oi.eps<0?'captured':'escape'}${oi.pe!=null&&oi.pe>0&&oi.eps<0?'<br><span style="color:var(--green)">STABLE ORBIT</span>':''}`;
+}
+
+/* telemetry */
+function updateHUD(){
+  const h=altitude(),sp=V.vel.length(),oi=orbitInfo();
+  $('tAlt').innerHTML=fmtDist(h).replace(/ (\w+)$/,' <small>$1</small>');
+  $('tVel').innerHTML=fmt(sp,sp<100?1:0)+' <small>m/s</small>';
+  $('tAp').textContent=oi.ap!=null&&oi.ap>0?fmtDist(oi.ap):'—';
+  $('tPe').textContent=oi.pe!=null?fmtDist(oi.pe):'—';
+  const rho=rhoAt(h);
+  $('tQ').textContent=fmt(.5*rho*sp*sp/1000,1)+' kPa';
+  $('tG').textContent=fmt(V.lastG||0,1);
+  $('tMass').textContent=fmt(V.mass/1000,2)+' t';
+  const si=Math.max(V.stageIdx,0);
+  $('tFuel').textContent=V.stages[si]&&V.stages[si].fuel?fmt(Math.max(0,V.stFuel[si]))+' u':'—';
+  $('tSAS').textContent=V.sas?'ON':'OFF';$('tSAS').style.color=V.sas?'var(--green)':'var(--dim)';
+  const met=V.met;$('tMET').textContent='T+'+(met>=3600?Math.floor(met/3600)+'h ':'')+(met>=60?Math.floor(met/60)%60+'m ':'')+fmt(met%60,0)+'s';
+  const pitch=drawNavball();
+  $('tPitch').textContent=fmt(pitch*180/Math.PI,0)+'°';
+  $('throtFill').style.height=(V.throttle*100)+'%';
+  $('throtPct').textContent=fmt(V.throttle*100,0)+'%';
+}
+
+/* keyboard */
+addEventListener('keydown',e=>{
+  const k=e.key.toLowerCase();keys[k]=true;
+  if(screenNow!=='flight'||!V)return;
+  if(k===' '){e.preventDefault();fireStage();}
+  if(k==='t'){V.sas=!V.sas;toast('SAS '+(V.sas?'on':'off'));}
+  if(k==='p')deployChutes();
+  if(k==='m')toggleMap();
+  if(k==='z')V.throttle=1;
+  if(k==='x')V.throttle=0;
+  if(k===','){setWarp(WARPS[Math.max(0,WARPS.indexOf(V.warp)-1)]);}
+  if(k==='.'){setWarp(WARPS[Math.min(WARPS.length-1,WARPS.indexOf(V.warp)+1)]);}
+  if(k==='f5'||e.key==='F5'){e.preventDefault();quickSave();}
+  if(k==='f9'||e.key==='F9'){e.preventDefault();quickLoad();}
+});
+addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
+function pollInput(dt){
+  input.pitch=(keys['w']?1:0)+(keys['s']?-1:0);
+  input.yaw=(keys['a']?-1:0)+(keys['d']?1:0);
+  input.roll=(keys['q']?-1:0)+(keys['e']?1:0);
+  if(V){
+    if(keys['shift'])V.throttle=clamp(V.throttle+dt*.8,0,1);
+    if(keys['control'])V.throttle=clamp(V.throttle-dt*.8,0,1);
+  }
+}
+/* touch buttons */
+for(const pad of['tpL','tpR'])$(pad).addEventListener('pointerdown',e=>{const b=e.target.closest('button');if(!b)return;
+  const k=b.dataset.k;if(k===' ')fireStage();else keys[k==='ctrl'?'control':k]=true;});
+for(const pad of['tpL','tpR'])$(pad).addEventListener('pointerup',e=>{const b=e.target.closest('button');if(!b)return;
+  const k=b.dataset.k;keys[k==='ctrl'?'control':k]=false;});
+
+/* quicksave */
+function serializeVessel(){
+  return{craft:JSON.parse(JSON.stringify(craft)),uidCounter,
+    pos:V.pos.toArray(),vel:V.vel.toArray(),q:V.q.toArray(),w:V.w.toArray(),
+    throttle:V.throttle,sas:V.sas,met:V.met,stageIdx:V.stageIdx,stFuel:[...V.stFuel],
+    partState:V.parts.map(p=>({uid:p.uid,alive:p.alive,lit:p.lit,srbFuel:p.srbFuel,chuteOut:p.chuteOut})),
+    name:craft.name,date:Date.now()};
+}
+function quickSave(){if(!V||V.dead)return;LS.setQS(serializeVessel());toast('Quicksaved','good');}
+function quickLoad(){
+  const s=LS.qs();if(!s){toast('No quicksave','warn');return;}
+  craft=s.craft;uidCounter=s.uidCounter;$('craftName').value=craft.name;
+  buildVessel();
+  V.pos.fromArray(s.pos);V.vel.fromArray(s.vel);V.q.fromArray(s.q);V.w.fromArray(s.w);
+  V.throttle=s.throttle;V.sas=s.sas;V.met=s.met;V.stageIdx=s.stageIdx;V.stFuel=s.stFuel;V.landed=false;
+  for(const ps of s.partState){const p=V.parts.find(x=>x.uid===ps.uid);if(!p)continue;
+    Object.assign(p,ps);
+    if(!p.alive&&p.mesh)p.mesh.visible=false;
+    if(p.chuteOut){const c=p.mesh&&p.mesh.getObjectByName('canopy');if(c)c.visible=true;}}
+  recalcMassProps();updateStagePanel();
+  $('deadPanel').style.display='none';vesselGroup.visible=true;
+  $('fCraftName').textContent=craft.name;
+  showScreen('flight');toast('Quicksave loaded','good');
+}
+
+/* flight camera + world offset */
+function renderFlight(){
+  const up=V.pos.clone().normalize();
+  world.position.copy(V.pos.clone().negate());
+  vesselGroup.quaternion.copy(V.q);
+  // vessel mesh origin is stack-bottom; shift so CoM sits at scene origin
+  vesselGroup.position.copy(new THREE.Vector3(0,-V.com,0).applyQuaternion(V.q));
+  // ground patch under vessel
+  const surf=up.clone().multiplyScalar(R_P);
+  groundPatch.position.copy(surf.clone().add(up.clone().multiplyScalar(.5)));
+  groundPatch.quaternion.setFromUnitVectors(new THREE.Vector3(0,0,1),up);
+  groundPatch.visible=altitude()<12000;
+  padGroup.position.copy(PAD_POS);
+  padGroup.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),PAD_UP);
+  // debris transforms
+  for(const g of debrisGroup.children){g.position.copy(g.userData.pos);g.quaternion.copy(g.userData.q);}
+  // sky tint
+  const h=altitude(),f=clamp(1-h/ATMO_H,0,1);
+  fScene.background=new THREE.Color().setRGB(.04+.25*f*f,.06+.4*f*f,.1+.65*f*f);
+  atmoMesh.visible=h>8000;
+  flightCam.tgt.set(0,0,0);
+  flightCam.apply(camera,up);
+}
+
+/* main loop */
+let lastT=performance.now();
+function loop(t){
+  requestAnimationFrame(loop);
+  const frameDt=Math.min((t-lastT)/1000,.1);lastT=t;
+  pollInput(frameDt);
+  if(screenNow==='vab'){
+    vabCam.apply(camera);
+    renderer.render(vabScene,camera);
+  }else if(screenNow==='flight'&&V){
+    if(!V.dead){
+      const DT=1/240;
+      let steps=Math.min(Math.round(V.warp*frameDt/DT),1600);
+      for(let i=0;i<steps;i++)physStep(DT);
+      stepDebris(frameDt*V.warp);
+    }
+    updateHUD();
+    if(mapOn)drawMap();
+    renderFlight();
+    renderer.render(fScene,camera);
+  }else{
+    renderer.render(vabScene,camera); // dim backdrop behind menu
+  }
+}
+
+/* ---------- wiring ---------- */
+$('vLaunch').onclick=()=>{
+  if(!craft.parts.length){toast('Vehicle is empty','warn');return;}
+  craft.name=$('craftName').value.trim()||'Untitled Vehicle';
+  buildVessel();updateStagePanel();
+  $('fCraftName').textContent=craft.name;
+  $('deadPanel').style.display='none';vesselGroup.visible=true;
+  flightCam.az=.9;flightCam.el=.15;flightCam.dist=Math.max(craftHeight()*2.4,16);
+  setWarp(1);showScreen('flight');
+  toast('On the pad — space to launch','good');
+};
+$('fRevert').onclick=()=>showScreen('vab');
+$('fQS').onclick=quickSave;$('fQL').onclick=quickLoad;$('fMap').onclick=toggleMap;
+$('dRelaunch').onclick=()=>$('vLaunch').onclick();
+$('dVab').onclick=()=>{$('deadPanel').style.display='none';showScreen('vab');};
+$('vMenu').onclick=()=>showScreen('menu');
+$('mNew').onclick=()=>{showScreen('vab');};
+$('mLoad').onclick=()=>openCraftList(true);
+$('mResume').onclick=quickLoad;
+$('mHelp').onclick=()=>$('helpModal').classList.add('on');
+$('hmClose').onclick=$('hmOk').onclick=()=>$('helpModal').classList.remove('on');
+$('mData').onclick=()=>$('dataModal').classList.add('on');
+$('dmClose').onclick=()=>$('dataModal').classList.remove('on');
+$('expAll').onclick=()=>{
+  const blob=new Blob([JSON.stringify({crafts:LS.crafts(),qs:LS.qs()},null,1)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='apogee-data.json';a.click();
+};
+$('impAll').onclick=()=>$('impFile').click();
+$('impFile').onchange=e=>{
+  const f=e.target.files[0];if(!f)return;
+  f.text().then(txt=>{try{
+    const d=JSON.parse(txt);
+    if(d.crafts)LS.setCrafts({...LS.crafts(),...d.crafts});
+    if(d.qs)LS.setQS(d.qs);
+    toast('Data imported','good');$('dataModal').classList.remove('on');
+  }catch(err){toast('Invalid file','bad');}});
+};
+
+/* starter craft */
+function starterCraft(){
+  craft={name:'Apogee 1',parts:[]};uidCounter=1;
+  const add=(defId,parentUid,attach,extra={})=>{const p={uid:uidCounter++,defId,parentUid,attach,...extra};craft.parts.push(p);return p;};
+  const pod=add('podS',null,'root');
+  const ch=add('chute',pod.uid,'top');
+  const t1=add('tankS',pod.uid,'bottom');
+  const e1=add('engVac',t1.uid,'bottom');
+  const d1=add('decoupler',e1.uid,'bottom');
+  const t2=add('tankL',d1.uid,'bottom');
+  const e2=add('engSwift',t2.uid,'bottom');
+  const gid='g'+uidCounter;
+  for(let k=0;k<3;k++)add('finS',t2.uid,'radial',{angle:k*2*Math.PI/3,sym:gid,roff:-(PARTS.tankL.h/2-PARTS.finS.chord/2)+.05});
+  $('craftName').value=craft.name;
+}
+starterCraft();
+buildCatalog();buildWarpRow();rebuildVabMeshes();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
