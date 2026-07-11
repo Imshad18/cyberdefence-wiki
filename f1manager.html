@@ -1000,12 +1000,11 @@ function newCareer(seed=1){
   teamNames.forEach((tm,i)=>{
     teams[tm]={name:tm,engine:E.engineOf(tm),
       budget:60+rng()*40,
-      sponsorships:[{name:['Apex Energy','Vortex Telecom','Helios Bank','Nimbus Air','Ionix Motors','Quantum Oil','Stellar Watches'][i%7],perYear:Math.round(18+rng()*16),years:1+Math.round(rng()*2),clause:null}],
+      sponsorships:[{name:['Apex Energy','Vortex Telecom','Helios Bank','Nimbus Air','Ionix Motors','Quantum Oil','Stellar Watches'][i%7],perYear:Math.round(18+rng()*16),years:1+Math.round(rng()*2),clauses:{results:null,podiumBonus:0,exitFee:20}}],
       devSpend:0, capUsed:0, capBreached:false, breachExcused:null,
       perf:basePerf[tm]||1.0, devPts:{aero:0,chassis:0},
       staff:55+Math.round(rng()*25), atr:1.0,            // wind-tunnel multiplier (set by standings)
       reliability:0.982+rng()*0.010, principalMood:0.7,
-      sponsorDeal:{name:['Apex Energy','Vortex Telecom','Helios Bank','Nimbus Air','Ionix Motors'][i%5],targetPos:Math.min(11,Math.max(1,i+1+(rng()<0.5?1:-1))),bonus:Math.round(12+rng()*18),podium:2},
       reserve:null, seats:E.GRID.filter(g=>g[2]===tm).map(g=>g[0])};
   });
   const drivers={};
@@ -1042,12 +1041,19 @@ function wageBill(C,tm){
 const SPONSOR_BRANDS=[['Mastercard',1],['Aramco',1],['Oracle Cloud',1],['Petronova',1],['Crypto.hex',2],
  ['DHL Express',2],['Pirelli Lifestyle',2],['MoneyGram',2],['Baltora Watches',2],['Kick Energy',3],
  ['Zenith Tools',3],['Rakuten',2],['Velo Foods',3],['Airstream Hotels',3],['ByteDance Play',2]];
-function makeSponsorOffer(C,tm){
+function makeSponsorOffer(C,tm,exclude){
   const ts=Object.keys(C.teams).map(t=>[t,C.teamPts[t]||0]).sort((a,b)=>b[1]-a[1]);
   let pos=ts.findIndex(([t])=>t===tm)+1;if(pos<=0)pos=6;
-  const topBrandBias=pos<=4?0.75:0.2;
+  const topBrandBias=pos<=4?2.2:0.35;
   const mega=Math.random()<(pos<=4?0.22:0.06);
-  const pick=SPONSOR_BRANDS.filter(([n,t])=>Math.random()<(t===1?topBrandBias:1))[0]||SPONSOR_BRANDS[9];
+  const excl=new Set([...(exclude||[]),
+    ...((C.teams[tm].sponsorships||[]).map(s=>s.name)),
+    ...((C.sponsorOffers||[]).filter(o=>o.team===tm).map(o=>o.name))]);
+  const pool=SPONSOR_BRANDS.filter(([n])=>!excl.has(n));
+  const src=pool.length?pool:SPONSOR_BRANDS;
+  const weights=src.map(([n,t])=>t===1?topBrandBias:t===2?1:0.8);
+  let r=Math.random()*weights.reduce((a,b)=>a+b,0),pick=src[0];
+  for(let i=0;i<src.length;i++){r-=weights[i];if(r<=0){pick=src[i];break;}}
   const base=mega?80+Math.round(Math.random()*40)
     :pos<=4?35+Math.round(Math.random()*45)
     :pos<=8?12+Math.round(Math.random()*26)
@@ -1056,21 +1062,45 @@ function makeSponsorOffer(C,tm){
     clauseOffer:{desc:`results clause: -30% payment if outside top ${Math.min(pos+2,10)}`,topN:Math.min(pos+2,10),bonusPct:0.2},
     expires:C.raceIdx+3};
 }
-function negotiateSponsor(C,tm,offerId,demand,takeClause){
+function negotiateSponsor(C,tm,off,terms){
+  // terms:{demand,years,results:bool,podiumBonus:$m|0,exitFee:$m}
   const T=C.teams[tm];
-  const off=(C.sponsorOffers||[]).find(o=>o.id===offerId);
-  if(!off)return{ok:false,why:'offer expired'};
-  const ceiling=off.base*(takeClause?1.25:1.0);
-  const p=Math.max(0.03,Math.min(0.95,0.92-Math.max(0,(demand-ceiling))/off.base*1.4));
-  C.sponsorOffers=C.sponsorOffers.filter(o=>o.id!==offerId);
+  if((T.sponsorships||[]).length>=5)return{ok:false,why:'Maximum 5 sponsors per team'};
+  let mult=1;
+  if(terms.results)mult+=0.25;                       // they pay more for downside protection
+  if(terms.podiumBonus>0)mult-=Math.min(terms.podiumBonus/off.base*0.5,0.15);
+  const feeRatio=(terms.exitFee||0)/Math.max(terms.demand,1);
+  mult+=feeRatio>=1?0.10:(feeRatio<=0.25?-0.12:0);   // easy exits make sponsors nervous
+  const ceiling=off.base*mult;
+  const p=Math.max(0.03,Math.min(0.95,0.92-Math.max(0,(terms.demand-ceiling))/off.base*1.4));
+  if(C.sponsorOffers)C.sponsorOffers=C.sponsorOffers.filter(o=>o.id!==off.id);
   if(Math.random()<p){
-    T.sponsorships.push({name:off.name,perYear:Math.round(demand),years:off.years,
-      clause:takeClause?{topN:off.clauseOffer.topN,cutPct:0.3}:null});
-    news(C,'market',`${off.name} sign with ${tm}: $${Math.round(demand)}m/yr × ${off.years}yr${takeClause?' (results clause)':''}.`);
+    T.sponsorships.push({name:off.name,perYear:Math.round(terms.demand),years:terms.years||off.years,
+      clauses:{results:terms.results?{topN:off.clauseOffer.topN,cutPct:0.3}:null,
+               podiumBonus:terms.podiumBonus||0,
+               exitFee:Math.round(terms.exitFee??terms.demand)}});
+    news(C,'market',`${off.name} sign with ${tm}: $${Math.round(terms.demand)}m/yr × ${terms.years||off.years}yr${terms.results?' · results clause':''}${terms.podiumBonus?' · $'+terms.podiumBonus+'m/podium':''}.`);
     return{ok:true,accepted:true,p};
   }
-  news(C,'rumour',`${off.name} walk away from ${tm} talks — the asking price was too steep.`);
-  return{ok:true,accepted:false,p,why:'Sponsor declined your demand'};
+  news(C,'rumour',`${off.name} walk away from ${tm} talks — terms too rich.`);
+  return{ok:true,accepted:false,p,why:'Sponsor declined your terms'};
+}
+function terminateSponsor(C,tm,idx){
+  const T=C.teams[tm];const sp=(T.sponsorships||[])[idx];
+  if(!sp)return{ok:false};
+  const fee=sp.clauses&&sp.clauses.exitFee!=null?sp.clauses.exitFee:sp.perYear;
+  if(T.budget<fee)return{ok:false,why:`Exit fee is $${fee}m — insufficient budget`};
+  T.budget-=fee;T.sponsorships.splice(idx,1);
+  news(C,'market',`${tm} terminate their ${sp.name} deal — $${fee}m exit fee paid.`);
+  return{ok:true,fee};
+}
+function seasonOffers(C,tm){
+  const rank=Object.keys(C.teams).map(t=>[t,C.teams[t].perf]).sort((a,b)=>b[1]-a[1]).findIndex(([t])=>t===tm)+1;
+  const lastChamp=C.history.length&&C.history[C.history.length-1].teams[0][0]===tm;
+  const n=Math.min(6,(rank<=4?4:rank<=8?3:2)+(lastChamp?2:0)+(Math.random()<0.4?1:0));
+  const out=[],used=new Set();
+  for(let i=0;i<n;i++){const o=makeSponsorOffer(C,tm,used);used.add(o.name);out.push(o);}
+  return out;
 }
 /* ---------------- seats & roster ---------------- */
 function teamColor(C,tm){
@@ -1206,9 +1236,15 @@ function postRace(C,R){
     if(d.morale<0.35&&Math.random()<0.4)
       news(C,'rumour',`Paddock talk: ${d.name} increasingly frustrated at ${d.team}. Exit clause chatter grows.`);
   }
-  // sponsor podium bonuses
-  for(const r of res.slice(0,3)){const T=C.teams[r.team];
-    if(T&&T.sponsorDeal){T.budget+=T.sponsorDeal.podium;}}
+  // podium money: sponsor bonuses in, driver bonuses out
+  for(const r of res.slice(0,3)){
+    const T=C.teams[r.team];if(!T)continue;
+    for(const sp of T.sponsorships||[])if(sp.clauses&&sp.clauses.podiumBonus){
+      T.budget+=sp.clauses.podiumBonus;
+      if(C.playerTeamHint===r.team)news(C,'market',`${sp.name} podium bonus: +$${sp.clauses.podiumBonus}m for ${r.team}.`);}
+    const d=C.drivers[r.code];
+    if(d&&d.clauses.podiumBonus){T.budget-=d.clauses.podiumBonus;d.morale=Math.min(1,d.morale+0.02);}
+  }
   // rivalries spark rarely from repeated flashpoints
   for(const inc of (R.incidents||[]).filter(i=>i.type==='collision'&&i.cars.length===2)){
     const [a,b]=inc.cars;
@@ -1245,8 +1281,8 @@ function postRace(C,R){
       const off=makeSponsorOffer(C,tm);
       if(C.playerTeamHint&&tm===C.playerTeamHint){C.sponsorOffers.push({...off,team:tm});
         news(C,'market',`${off.name} want to talk sponsorship with ${tm} — offer on the table.`);}
-      else if(Math.random()<0.5){
-        C.teams[tm].sponsorships.push({name:off.name,perYear:off.base,years:off.years,clause:null});
+      else if(Math.random()<0.5&&C.teams[tm].sponsorships.length<5){
+        C.teams[tm].sponsorships.push({name:off.name,perYear:off.base,years:off.years,clauses:{results:null,podiumBonus:0,exitFee:off.base}});
         if(off.base>=60)news(C,'market',`BLOCKBUSTER: ${off.name} announce a $${off.base}m/yr deal with ${tm}.`);
       }
     }
@@ -1271,7 +1307,8 @@ function seasonEnd(C){
     let income=0;
     for(const sp of T.sponsorships){
       let pay=sp.perYear;
-      if(sp.clause&&i+1>sp.clause.topN){pay=Math.round(pay*(1-sp.clause.cutPct));
+      const rc=sp.clauses&&sp.clauses.results;
+      if(rc&&i+1>rc.topN){pay=Math.round(pay*(1-rc.cutPct));
         news(C,'market',`${sp.name} cut ${tm}'s payment to $${pay}m — results clause triggered (P${i+1}).`);}
       income+=pay;sp.years--;
       if(sp.years<=0)news(C,'market',`${sp.name}'s deal with ${tm} has expired.`);
@@ -1279,8 +1316,6 @@ function seasonEnd(C){
     T.sponsorships=T.sponsorships.filter(sp=>sp.years>0);
     const wages=wageBill(C,tm);
     T.budget+=prize+income-wages;
-    if(T.sponsorDeal&&i+1<=T.sponsorDeal.targetPos){T.budget+=T.sponsorDeal.bonus;
-      news(C,'market',`${T.sponsorDeal.name} pay ${tm} a $${T.sponsorDeal.bonus}m bonus — P${T.sponsorDeal.targetPos} objective met (P${i+1}).`);}
     if(T.budget<0){news(C,'media',`FINANCIAL CRISIS at ${tm}: wage bill exceeds income. The board demands cuts.`);T.budget=Math.max(T.budget,-30);}
     T.atr=0.7+0.05*i;                                     // P1 gets least tunnel time
     events.push({team:tm,prize,pos:i+1});
@@ -1375,6 +1410,9 @@ function approachDriver(C,team,code,offer){
   score+=offer.num1&&!d.clauses.num1?0.18:0;
   score+=(1-d.morale)*0.35;
   score+=offer.years>=2?0.06:0;
+  score+=offer.exitN>0?0.08:0;                              // freedom appeals
+  score+=offer.podiumBonus?Math.min(offer.podiumBonus/20,0.15):0;
+  score-=offer.releaseFee&&offer.releaseFee>offer.salary?0.05:0;  // golden handcuffs
   if(d.years>0&&!offer.releaseBuyout)return{ok:false,why:'Under contract — buyout required',score};
   const p=Math.max(0.03,Math.min(0.96,0.42+score));
   const rng=Math.random();
@@ -1386,7 +1424,10 @@ function approachDriver(C,team,code,offer){
     }
     if(cost){T.budget-=cost;cur.budget+=cost;}
     const old=d.team;d.team=team;d.salary=offer.salary;d.years=offer.years;
-    d.clauses.num1=!!offer.num1;d.morale=0.8;
+    d.clauses={num1:!!offer.num1,exitIfNotTopN:offer.exitN||0,
+      releaseFee:Math.round(offer.releaseFee??Math.max(15,offer.salary*0.6)),
+      podiumBonus:offer.podiumBonus||0};
+    d.morale=0.8;
     const oldT=C.teams[old];if(oldT){const i=oldT.seats.indexOf(code);if(i>=0)oldT.seats.splice(i,1);}
     news(C,'market',`OFFICIAL: ${d.name} signs for ${team} — $${offer.salary}m/yr, ${offer.years} years${offer.num1?', guaranteed #1 status':''}. ${old} receive $${cost}m buyout.`);
     return{ok:true,accepted:true,p};
@@ -1507,7 +1548,7 @@ function save(C){return JSON.stringify(C);}
 function load(str){return JSON.parse(str);}
 
 return {newCareer,preWeekend,postRace,seasonEnd,judgeCapBreach,develop,hireStaff,
-        sponsorIncome,wageBill,makeSponsorOffer,negotiateSponsor,
+        sponsorIncome,wageBill,makeSponsorOffer,negotiateSponsor,terminateSponsor,seasonOffers,
         buildRoster,normalizeSeats,assignSeat,
         approachDriver,releaseDriver,signFree,promoteJunior,aiMarket,
         proposeReg,applyReg,addTeamVote,challengePenalty,standings,news,
@@ -1614,8 +1655,13 @@ function buildSetup(){
     b.textContent='▶ Resume career ('+(JSON.parse(saved).year)+')';
     b.onclick=()=>{CAR=CAREER.load(saved);GAMELEN='season';openHub();};
     $('btnLoad').after(b);}
-  $('go').onclick=()=>{
-    if(GAMELEN==='season'){if(!CAR)CAR=CAREER.newCareer(CFG.seed);openHub();}
+  $('go').onclick=async()=>{
+    if(GAMELEN==='season'){
+      const fresh=!CAR;
+      if(!CAR)CAR=CAREER.newCareer(CFG.seed);
+      if(fresh&&CFG.mode==='tp'){CAR.playerTeamHint=CFG.playerTeam;await sponsorDraft();}
+      openHub();
+    }
     else startRace();
   };
 }
@@ -1670,12 +1716,14 @@ function openHub(){
         <button class="bx" data-dev="engine">+ Engine $8m (mfr fund)</button>
         <button class="bx" data-staff="5">Hire 5 staff $4m</button>
       </div>
-      <div style="margin-top:7px;font-size:11.5px;color:var(--gold)">🤝 ${T.sponsorDeal.name}: finish P${T.sponsorDeal.targetPos}+ → <b class="mono">$${T.sponsorDeal.bonus}m</b> bonus · $${T.sponsorDeal.podium}m per podium</div>
       <div style="margin-top:6px;font-size:11.5px;color:var(--dim)">Car perf <b class="mono" style="color:var(--cyan)">${((T.perf-1)*100).toFixed(2)}%</b> · engine: ${T.engine} (fund $${C.engines[T.engine].fund.toFixed(0)}m) · reliability ${(T.reliability*100).toFixed(1)}%</div>
       <div id="myDrivers" style="margin-top:8px"></div>
       <h4 style="margin:12px 0 6px;font-size:12px;letter-spacing:.2em;color:var(--gold)">SPONSORS</h4>
-      <div style="font-size:12px">${T.sponsorships.map(sp=>
-        `<div>💼 <b>${sp.name}</b> — $${sp.perYear}m/yr · ${sp.years}yr${sp.clause?' · results clause (top '+sp.clause.topN+')':''}</div>`).join('')||'<span style="color:var(--dim)">No active deals.</span>'}</div>
+      <div style="font-size:12px">${T.sponsorships.map((sp,i)=>
+        `<div style="display:flex;align-items:center;gap:6px;margin-top:3px">💼 <b>${sp.name}</b>
+          <span style="color:var(--dim)">$${sp.perYear}m/yr · ${sp.years}yr${sp.clauses&&sp.clauses.results?' · results(top '+sp.clauses.results.topN+')':''}${sp.clauses&&sp.clauses.podiumBonus?' · $'+sp.clauses.podiumBonus+'m/podium':''} · exit $${sp.clauses?sp.clauses.exitFee:sp.perYear}m</span>
+          <button class="bx" style="margin-left:auto;padding:2px 8px;font-size:10px" data-spx="${i}">TERMINATE</button></div>`).join('')||'<span style="color:var(--dim)">No active deals.</span>'}</div>
+      <div class="btnrow" style="margin-top:6px"><button class="bx" id="spSeek">📨 SEEK NEW SPONSORS</button></div>
       <div id="spInbox" style="margin-top:7px"></div>`;
     const inbox=(C.sponsorOffers||[]).filter(o=>o.team===CFG.playerTeam);
     $('spInbox').innerHTML=inbox.map(o=>
@@ -1684,16 +1732,22 @@ function openHub(){
         <button class="bx" style="margin-left:auto" data-sp="${o.id}">NEGOTIATE</button></div>`).join('');
     $('spInbox').querySelectorAll('[data-sp]').forEach(b=>b.onclick=async()=>{
       const o=(C.sponsorOffers||[]).find(x=>x.id===b.dataset.sp);if(!o)return;
-      const v=await modal({title:'SPONSOR TALKS — '+o.name,
-        html:`They value the partnership around <b>$${o.base}m/yr</b> for ${o.years} years. Demand more and they may walk.<br><span style="color:var(--dim)">${o.clauseOffer.desc} → they'll pay ~25% more if you accept it.</span>`,
-        fields:[{k:'ask',label:'Your demand ($m / yr)',type:'number',def:o.base},
-                {k:'cl',label:'Accept the results clause (+25% ceiling)',type:'check',def:false}],
-        buttons:[{label:'WALK AWAY',val:0,cls:'grey'},{label:'DEMAND IT',val:1}]});
+      await negotiateSponsorUI(o);openHub();});
+    $('hubTeam').querySelectorAll('[data-spx]').forEach(b=>b.onclick=async()=>{
+      const sp=T.sponsorships[+b.dataset.spx];if(!sp)return;
+      const fee=sp.clauses?sp.clauses.exitFee:sp.perYear;
+      const v=await modal({title:'TERMINATE — '+sp.name,
+        html:`Ending this deal costs the agreed exit fee: <b>$${fee}m</b>.`,
+        buttons:[{label:'KEEP DEAL',val:0,cls:'grey'},{label:'PAY & TERMINATE',val:1,cls:'red'}]});
       if(!v||!v.val)return;
-      const r=CAREER.negotiateSponsor(C,CFG.playerTeam,o.id,v.fields.ask,v.fields.cl);
-      await toast('SPONSORSHIP',r.accepted?`<b style="color:var(--green)">SIGNED!</b> ${o.name} — $${Math.round(v.fields.ask)}m/yr × ${o.years}yr.`:
-        `<b style="color:var(--red)">They walked.</b> ${r.why||''} (acceptance was ~${Math.round((r.p||0)*100)}%)`);
+      const r=CAREER.terminateSponsor(C,CFG.playerTeam,+b.dataset.spx);
+      if(!r.ok)await toast('BLOCKED',r.why);
       openHub();});
+    $('spSeek').onclick=async()=>{
+      if(T.sponsorships.length>=5){await toast('SPONSORS','You already carry the maximum of 5 sponsors.');return;}
+      if(Math.random()<0.25){await toast('SPONSORS','Your agency calls around… no brands are interested right now. Win something.');openHub();return;}
+      const off=CAREER.makeSponsorOffer(C,CFG.playerTeam);
+      await negotiateSponsorUI(off);openHub();};
     $('hubTeam').querySelectorAll('[data-dev]').forEach(b=>b.onclick=async()=>{
       const r=CAREER.develop(C,CFG.playerTeam,b.dataset.dev,8);
       if(!r.ok)await toast('DEVELOPMENT',r.why||'Blocked.');openHub();});
@@ -1742,15 +1796,17 @@ function openHub(){
                 {k:'yrs',label:'Years',type:'number',def:2},
                 {k:'when',label:'Joining',type:'select',def:'Immediately',opts:['Immediately','Next season']},
                 {k:'n1',label:'Guaranteed #1 status clause',type:'check',def:false},
-                {k:'exit',label:'Exit clause: driver may leave if team outside top-4',type:'check',def:false}],
+                {k:'exitN',label:'Exit clause: may leave if team outside top-N (0 = none)',type:'number',def:0},
+                {k:'buyout',label:'Release fee rivals must pay to poach him ($m)',type:'number',def:Math.round(Math.max(15,d.salary*0.8))},
+                {k:'pb',label:'Podium bonus you pay him ($m per podium)',type:'number',def:0}],
         buttons:[{label:'CANCEL',val:0,cls:'grey'},{label:d.years>0&&d.team!=='FREE'?'OFFER + PAY BUYOUT':'MAKE OFFER',val:1}]});
       if(!v||!v.val)return;
       let r;
       const when=v.fields.when==='Next season'?'nextSeason':'now';
       if(d.team==='FREE'){r=CAREER.signFree(C,CFG.playerTeam,code,{salary:v.fields.sal,years:v.fields.yrs});
         if(r.ok)r.accepted=true;}
-      else r=CAREER.approachDriver(C,CFG.playerTeam,code,{salary:v.fields.sal,years:v.fields.yrs,num1:v.fields.n1,when,releaseBuyout:d.years>0});
-      if(r.ok&&r.accepted&&v.fields.exit&&C.drivers[code])C.drivers[code].clauses.exitIfNotTopN=4;
+      else r=CAREER.approachDriver(C,CFG.playerTeam,code,{salary:v.fields.sal,years:v.fields.yrs,num1:v.fields.n1,when,
+        exitN:v.fields.exitN||0,releaseFee:v.fields.buyout,podiumBonus:v.fields.pb||0,releaseBuyout:d.years>0});
       if(r.accepted&&!r.deferred)await placeDriver(code,d.name);
       else await toast('NEGOTIATION',r.accepted?`<b style="color:var(--green)">PRE-CONTRACT SIGNED.</b> ${d.name} joins ${CFG.playerTeam} next season.`:
         `<b style="color:var(--red)">Declined.</b> ${r.why||'Estimated acceptance was '+Math.round((r.p||0)*100)+'%. Sweeten the offer.'}`);
@@ -1867,6 +1923,41 @@ function applyPostPenalty(code,secs,pts){
   for(const b of before){CAR.driverPts[b.code]-=b.pts;CAR.teamPts[b.team]-=b.pts;}
   for(const r of R2.results){CAR.driverPts[r.code]=(CAR.driverPts[r.code]||0)+r.pts;
     CAR.teamPts[r.team]=(CAR.teamPts[r.team]||0)+r.pts;}
+}
+async function negotiateSponsorUI(off){
+  const C=CAR;
+  const v=await modal({title:'SPONSOR TALKS — '+off.name,
+    html:`They value the partnership around <b>$${off.base}m/yr</b> · ${off.years}yr territory. Set YOUR terms — every clause moves their ceiling.`,
+    fields:[{k:'ask',label:'Your demand ($m / yr)',type:'number',def:off.base},
+            {k:'yrs',label:'Contract years',type:'number',def:off.years},
+            {k:'res',label:`Results clause: −30% payment if outside top ${off.clauseOffer.topN} (they pay ~25% more)`,type:'check',def:false},
+            {k:'pb',label:'Podium bonus they pay you ($m per podium — lowers their ceiling)',type:'number',def:0},
+            {k:'fee',label:'YOUR exit fee to terminate early ($m — low fee makes them nervous)',type:'number',def:off.base}],
+    buttons:[{label:'WALK AWAY',val:0,cls:'grey'},{label:'PUT IT ON THE TABLE',val:1}]});
+  if(!v||!v.val)return null;
+  const r=CAREER.negotiateSponsor(C,CFG.playerTeam,off,
+    {demand:v.fields.ask,years:v.fields.yrs,results:v.fields.res,podiumBonus:v.fields.pb||0,exitFee:v.fields.fee});
+  await toast('SPONSORSHIP',r.accepted?`<b style="color:var(--green)">SIGNED!</b> ${off.name} — $${Math.round(v.fields.ask)}m/yr × ${v.fields.yrs}yr.`:
+    `<b style="color:var(--red)">${r.why||'They walked.'}</b>${r.p!=null?' (acceptance was ~'+Math.round(r.p*100)+'%)':''}`);
+  return r;
+}
+async function sponsorDraft(){
+  const C=CAR;
+  let offers=CAREER.seasonOffers(C,CFG.playerTeam);
+  C.teams[CFG.playerTeam].sponsorships=[];        // your garage, your deals
+  while(true){
+    const T=C.teams[CFG.playerTeam];
+    const v=await modal({title:`SPONSOR DRAFT — ${CFG.playerTeam} (${T.sponsorships.length}/5 signed)`,must:true,
+      html:`${offers.length?'Brands at the door — negotiate whichever you want, in any order:':'No more offers on the table.'}
+        ${T.sponsorships.length?'<br><br>Signed: '+T.sponsorships.map(s=>`<b>${s.name}</b> $${s.perYear}m`).join(' · '):''}`,
+      buttons:[...offers.map((o,i)=>({label:`${o.name} · ~$${o.base}m/yr · ${o.years}yr`,val:i})),
+               {label:T.sponsorships.length?'DONE — GO RACING ➜':'RACE UNSPONSORED ➜',val:'done',cls:'grey'}]});
+    if(!v||v.val==='done')break;
+    const off=offers[v.val];
+    const r=await negotiateSponsorUI(off);
+    if(r)offers.splice(v.val,1);                  // signed or walked: offer consumed
+    if(C.teams[CFG.playerTeam].sponsorships.length>=5)break;
+  }
 }
 async function placeDriver(code,name){
   const C=CAR,T=C.teams[CFG.playerTeam];
