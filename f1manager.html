@@ -884,14 +884,14 @@ function aiTeams(R){
     if(c.retired||c.done)continue;
     if(R.red.active){  // free change if wrong tyres or worn
       const wet=R.wetness>0.42, onWet=c.tyre==='I'||c.tyre==='W';
-      if(R.mode==='tp'&&c.team===R.playerTeam)continue;
+      if(R.mode==='tp'&&c.team===R.playerTeam&&!R.autopilot)continue;
       if(wet&&!onWet)boxCar(R,c.code,R.wetness>0.72?'W':'I');
       else if(!wet&&onWet&&R.rain<0.15)boxCar(R,c.code,'M');
       else if(c.wear>30)boxCar(R,c.code,pickDry(R,R.laps-c.lap));
       continue;
     }
     if(c.inPit||c.pitReq)continue;
-    if(R.mode==='tp'&&c.team===R.playerTeam)continue;      // player controls these
+    if(R.mode==='tp'&&c.team===R.playerTeam&&!R.autopilot)continue; // player controls these (unless simming)
     const T=TYRES[c.tyre];
     const lapsLeft=R.laps-c.lap;
     // puncture or heavy damage: box now
@@ -1849,7 +1849,7 @@ function openHub(){
     $('hub').style.display='none';
     window.__simWeekend=true;
     await startWeekend();
-    if(R&&!R.finished){let g3=0;while(!R.finished&&g3++<4e5)ENGINE.step(R,0.25);}
+    if(R&&!R.finished){R.autopilot=true;let g3=0;while(!R.finished&&g3++<4e5)ENGINE.step(R,0.25);}
     window.__simWeekend=false;
   };
 }
@@ -1909,6 +1909,7 @@ async function startWeekend(){
                {label:'BREACH IT: change setup → PIT-LANE START',val:1,cls:'red'}]});
     if(v&&v.val==='sim'){
       startRace({gridOrder:PW.grid,carPerf:PW.carPerf,reliability:PW.reliability,roster:PW.roster,rivalries:PW.rivalries});
+      R.autopilot=true;
       let g3=0;while(!R.finished&&g3++<4e5)ENGINE.step(R,0.25);
       return;
     }
@@ -2530,6 +2531,7 @@ function wireChrome(){
       html:'The AI plays out the rest of the race instantly. In Team Principal mode your current strategies stay set.',
       buttons:[{label:'KEEP RACING',val:0,cls:'grey'},{label:'SIM TO THE END',val:1}]});
     if(!v||!v.val)return;
+    R.autopilot=true;
     let g2=0;while(!R.finished&&g2++<4e5)ENGINE.step(R,0.25);
   };
   $('btnSnd').onclick=()=>{SND=!SND;$('btnSnd').textContent=SND?'🔊':'🔇';};
