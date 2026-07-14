@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>GLOBAL POWER — Statecraft Simulator</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <!-- Animated global backdrop (starfield + grid + aurora) -->
+  <canvas id="bg-canvas" aria-hidden="true"></canvas>
+
+  <!-- App root; screens are injected here -->
+  <div id="app"></div>
+
+  <!-- Breaking-news interrupt overlay -->
+  <div id="breaking" class="breaking hidden" role="alert"></div>
+
+  <!-- Toast stack -->
+  <div id="toasts" class="toasts"></div>
+
+  <!-- Persistent top HUD (only during governing) -->
+  <div id="hud" class="hud hidden"></div>
+
+  <!-- News ticker (governing) -->
+  <div id="ticker" class="ticker hidden"><div id="ticker-track" class="ticker-track"></div></div>
+
+  <!-- Scripts: order matters (data -> engine -> ui -> main) -->
+  <script src="js/data/countries.js"></script>
+  <script src="js/data/campaign.js"></script>
+  <script src="js/data/policies.js"></script>
+  <script src="js/data/events.js"></script>
+
+  <script src="js/engine/util.js"></script>
+  <script src="js/engine/state.js"></script>
+  <script src="js/engine/economy.js"></script>
+  <script src="js/engine/ai.js"></script>
+  <script src="js/engine/news.js"></script>
+
+  <script src="js/ui/components.js"></script>
+  <script src="js/ui/map.js"></script>
+  <script src="js/ui/background.js"></script>
+  <script src="js/ui/govviews.js"></script>
+  <script src="js/ui/screens.js"></script>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
