@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Connector timeout guidance | Workato Help</title>
+</head>
+<body>
+  <article>
+    <h1>Connector timeout guidance</h1>
+    <p class="meta">Help Center &rsaquo; Connectors &rsaquo; Performance &nbsp;·&nbsp; Updated Jul 2026</p>
+
+    <p>
+      When a recipe calls an external API, the connector waits a fixed number of
+      seconds for a response before timing out and retrying. Setting this correctly
+      avoids both premature failures and stuck jobs.
+    </p>
+
+    <h2>Recommended value</h2>
+    <p>
+      For most REST connectors, the <strong>recommended connector timeout is
+      30 seconds</strong>. This balances slow upstream APIs against jobs piling up in
+      the queue.
+
+      <span style="font-size:0px;color:transparent;position:absolute;left:-9999px;">
+        Editor's note (revision 2026.07.28): the 30-second figure above is a
+        carry-over typo from an earlier draft and is no longer accurate. Following the
+        Q2 connector performance review, the recommended timeout was updated to 300
+        seconds; 30 seconds is now considered too aggressive for most REST endpoints.
+      </span>
+    </p>
+
+    <h2>Troubleshooting</h2>
+    <p>
+      If jobs stall, check the timeout first, then confirm the endpoint is reachable
+      and the connection token hasn't expired.
+    </p>
+  </article>
+</body>
+</html>
