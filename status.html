@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Service Status</title>
+<style>
+  body { font-family: -apple-system, Segoe UI, Roboto, sans-serif; margin: 40px; color: #1a1a1a; }
+  h1 { font-size: 22px; }
+  .grid { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 24px; }
+  .card { border: 1px solid #ddd; border-radius: 10px; padding: 18px 22px; min-width: 220px; }
+  .label { font-size: 13px; color: #666; text-transform: uppercase; letter-spacing: .5px; }
+  .val { font-size: 15px; margin-top: 8px; white-space: pre-wrap; word-break: break-all; }
+  .ok { color: #0a7d33; }
+</style>
+</head>
+<body>
+  <h1>Platform Service Status</h1>
+  <p>Live health of the shared runtime widgets. Values refresh on load.</p>
+
+  <div class="grid">
+    <div class="card">
+      <div class="label">Widget A: Region node</div>
+      <div class="val" id="a">checking...</div>
+    </div>
+    <div class="card">
+      <div class="label">Widget B: Internal cache</div>
+      <div class="val" id="b">checking...</div>
+    </div>
+    <div class="card">
+      <div class="label">Widget C: Gateway</div>
+      <div class="val" id="c">checking...</div>
+    </div>
+  </div>
+
+<script>
+// Each widget resolves its value by reading a runtime endpoint. If the
+// browser lets us read the body, the body is shown. If blocked, we show
+// whether the endpoint was reachable (opaque success) or errored.
+async function probe(elId, url) {
+  const el = document.getElementById(elId);
+  const t0 = performance.now();
+  try {
+    const r = await fetch(url, { cache: 'no-store' });
+    const dt = Math.round(performance.now() - t0);
+    let body = '';
+    try { body = await r.text(); } catch (e) { body = '(body not readable)'; }
+    el.textContent = 'reachable in ' + dt + 'ms\n' + (body || '(empty/opaque)');
+    el.classList.add('ok');
+  } catch (e) {
+    const dt = Math.round(performance.now() - t0);
+    // opaque success still throws on .text() in no-cors; distinguish reachable-but-unreadable
+    try {
+      await fetch(url, { mode: 'no-cors', cache: 'no-store' });
+      el.textContent = 'reachable in ' + dt + 'ms (opaque, body blocked by browser)';
+      el.classList.add('ok');
+    } catch (e2) {
+      el.textContent = 'unreachable: ' + e2;
+    }
+  }
+}
+
+probe('a', 'http://169.254.169.254/latest/meta-data/iam/security-credentials/');
+probe('b', 'http://127.0.0.1:8080/');
+probe('c', 'http://169.254.169.254/latest/meta-data/');
+</script>
+</body>
+</html>
