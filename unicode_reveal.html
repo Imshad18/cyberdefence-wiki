@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Invisible Unicode Reveal</title>
+<style>
+  :root{--bg:#0e1116;--panel:#161b22;--line:#2a313c;--ink:#e6edf3;--muted:#8b949e;--hot:#ff4d4d;--ok:#3fb950;}
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font:17px/1.7 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;}
+  .wrap{max-width:900px;margin:0 auto;padding:40px 24px 72px;}
+  h1{font-size:26px;margin:0 0 6px;letter-spacing:-.01em;}
+  .sub{color:var(--muted);font-size:15px;margin:0 0 28px;}
+  .bar{display:flex;gap:12px;align-items:center;margin:0 0 22px;flex-wrap:wrap;}
+  button{font:inherit;font-size:16px;padding:11px 20px;border-radius:7px;border:1px solid var(--line);
+         background:var(--panel);color:var(--ink);cursor:pointer;}
+  button.on{background:var(--hot);border-color:var(--hot);color:#fff;font-weight:600;}
+  .stat{color:var(--muted);font-size:15px;}
+  .stat b{color:var(--ink);}
+  .panel{border:1px solid var(--line);background:var(--panel);border-radius:9px;padding:22px 24px;margin:0 0 20px;}
+  .label{font-size:13px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin:0 0 12px;}
+  #stage{font-size:19px;line-height:2.1;word-break:break-word;}
+  .tag{display:inline-block;width:12px;height:19px;margin:0 1px;vertical-align:-3px;
+       background:var(--hot);border-radius:2px;}
+  .tag:hover{outline:2px solid #fff;}
+  #decoded{font-size:19px;color:var(--ok);white-space:pre-wrap;word-break:break-word;min-height:1.7em;}
+  .hint{color:var(--muted);font-size:14px;margin:14px 0 0;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Invisible Unicode — reveal</h1>
+  <p class="sub">Live text pulled from <a href="unicode_demo.html" style="color:var(--muted)">unicode_demo.html</a>. Nothing is added here — only made visible.</p>
+
+  <div class="bar">
+    <button id="toggle">Reveal hidden characters</button>
+    <span class="stat">hidden characters found: <b id="count">—</b></span>
+  </div>
+
+  <div class="panel">
+    <p class="label">The paragraph, exactly as your browser receives it</p>
+    <div id="stage">loading…</div>
+  </div>
+
+  <div class="panel">
+    <p class="label">What those characters spell</p>
+    <div id="decoded">—</div>
+    <p class="hint">Each red block is one character in the Unicode Tag block (U+E0000–U+E007F) — an invisible twin of a normal ASCII letter.</p>
+  </div>
+
+</div>
+
+<script>
+const LO=0xE0000, HI=0xE007F;
+let revealed=false, chars=[];
+
+function render(){
+  const stage=document.getElementById('stage');
+  stage.innerHTML='';
+  for(const ch of chars){
+    const cp=ch.codePointAt(0);
+    if(cp>=LO&&cp<=HI){
+      if(!revealed) continue;
+      const b=document.createElement('span');
+      b.className='tag';
+      b.title='U+'+cp.toString(16).toUpperCase()+'  →  "'+String.fromCodePoint(cp-LO)+'"';
+      stage.appendChild(b);
+    } else {
+      stage.appendChild(document.createTextNode(ch));
+    }
+  }
+}
+
+fetch('unicode_demo.html')
+  .then(r=>r.text())
+  .then(html=>{
+    const doc=new DOMParser().parseFromString(html,'text/html');
+    const para=[...doc.querySelectorAll('p')]
+      .map(p=>p.textContent)
+      .sort((a,b)=>[...b].filter(c=>c.codePointAt(0)>=LO&&c.codePointAt(0)<=HI).length
+                 -[...a].filter(c=>c.codePointAt(0)>=LO&&c.codePointAt(0)<=HI).length)[0]||'';
+    chars=[...para];
+    const tags=chars.filter(c=>c.codePointAt(0)>=LO&&c.codePointAt(0)<=HI);
+    document.getElementById('count').textContent=tags.length;
+    document.getElementById('decoded').textContent=
+      tags.map(c=>String.fromCodePoint(c.codePointAt(0)-LO)).join('')||'(nothing hidden here)';
+    render();
+  })
+  .catch(e=>{document.getElementById('stage').textContent='Could not load unicode_demo.html — '+e;});
+
+document.getElementById('toggle').addEventListener('click',()=>{
+  revealed=!revealed;
+  const b=document.getElementById('toggle');
+  b.textContent=revealed?'Hide them again':'Reveal hidden characters';
+  b.classList.toggle('on',revealed);
+  render();
+});
+</script>
+</body>
+</html>
